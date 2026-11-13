@@ -1,0 +1,14 @@
+n=16: 3856 variables, 49480 clauses; 3 parents at depth 3, 36 child cubes
+native search: 3,524,956 nodes below the cubes in total (0 s)
+verdicts agree in every mode: 17 SAT, 19 UNSAT
+mode                                 conflicts   propagations   decisions  seconds
+fresh solver per cube                1,395,613    200,055,553   1,606,035     42.2
+persistent per sibling family (A)    1,178,804    149,764,330   1,358,411     43.6
+persistent per sibling family (B)    1,240,796    157,841,852   1,430,284     43.6
+one persistent solver, all cubes     1,292,277    157,990,178   1,492,045     52.4
+fresh / family (A): conflicts x1.18, propagations x1.34
+fresh / family (B): conflicts x1.12, propagations x1.27
+fresh / global: conflicts x1.08, propagations x1.27
+within-family learning curve, family (A): sibling position -> fresh conflicts / persistent conflicts
+  0:1.00  1:1.26  2:1.03  3:1.22  4:1.52  5:1.66  6:0.48  7:1.31  8:1.05  9:2.45  10:1.38  11:1.25  12:1.36
+native nodes per conflict (fresh): 2.5

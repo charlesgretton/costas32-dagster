@@ -1,0 +1,54 @@
+{
+ "tree_nodes_order32": {
+  "estimates": [
+   1.5365e+20,
+   1.5409e+20,
+   1.5438e+20,
+   1.5374e+20,
+   1.5354e+20
+  ],
+  "stderrs": [
+   2.544e+17,
+   2.571e+17,
+   2.598e+17,
+   2.947e+17,
+   1.767e+17
+  ],
+  "inverse_variance_mean": 1.5381849134598996e+20,
+  "stderr": 1.0603693541349352e+17,
+  "relative_stderr": 0.000689364032149948,
+  "max_single_probe_share": 0.000212
+ },
+ "tree_nodes": {
+  "29": 1.5663e+18,
+  "30": 7.0973e+18,
+  "31": 3.4057e+19
+ },
+ "growth_ratios": {
+  "30/29": 4.531251995147801,
+  "31/30": 4.798585377537937,
+  "32/31": 4.516501492967377
+ },
+ "node_rate_order32_per_core": 3712000.0,
+ "direct_dfs_cost": {
+  "core_hours": 11510603100.005234,
+  "core_years": 1313096.406571439,
+  "KSU_at_2SU_per_core_hour": 23021206.200010467
+ },
+ "order29_direct_dfs_core_years": 13370.973045019811,
+ "order29_reported_2011_cpu_years": 366.55,
+ "efficiency_ratio_2011_vs_this_dfs_order29": 36.47789672628512,
+ "legacy_scaled": {
+  "tree_ratio_32_over_29": 98.2049999016727,
+  "cpu_years_2010_hardware": 35997.04271395813,
+  "modern_core_years_if_per_core_speedup_2_to_4": [
+   8999.260678489532,
+   17998.521356979065
+  ],
+  "KSU_if_per_core_speedup_2_to_4": [
+   157775.03821527847,
+   315550.07643055695
+  ]
+ },
+ "validation": "exact counts 10-14 match Paper 1 (minus the root); 15/15 estimator runs at orders 12-16 cover the exact count within 2 s.e.; max error 0.32%"
+}

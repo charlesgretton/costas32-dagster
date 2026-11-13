@@ -1,0 +1,18 @@
+#!/bin/bash
+# Kissat on one core per region, a full node, a shared work queue: the bulk runs for the
+# f=6 and f=4 classes. Each core takes the next region as soon as it is free.
+#   qsub -l walltime=HH:MM:SS -v IDS=<file of region ids>,CAP=<seconds per region> hpc/kissat_class.pbs
+# Normally submitted by hpc/submit_class.sh, which sizes the walltime.
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=104,mem=480GB,walltime=06:00:00,jobfs=16GB
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas-class
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-.}"; source hpc/env.sh
+[ -n "${IDS:-}" ] || { echo "set IDS to a file of region ids"; exit 1; }
+OUT="$COSTAS_DATA/results/class_${PBS_JOBID:-local}"; mkdir -p "$OUT"
+cp "$IDS" "$OUT/regions.txt"; echo "regions: $(grep -c . "$OUT/regions.txt"), cap ${CAP:-3600} s"
+QUEUE=1 bash hpc/run_shards.sh "$OUT/regions.txt" "$OUT" "${CAP:-3600}" A 1 104
+python3 hpc/stage1_by_f.py "$OUT/ledger.jsonl" --no-projection | tee "$OUT/report.txt"

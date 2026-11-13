@@ -1,0 +1,12 @@
+#!/bin/bash
+# Run the Kissat check on a COMPUTE node (a different CPU from the login node).
+#   qsub hpc/kissat_check.pbs        then: cat costas-kchk.o*
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=1,mem=4GB,walltime=00:10:00
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas-kchk
+cd "${PBS_O_WORKDIR:-.}"; source hpc/env.sh
+echo "node: $(hostname)  cpu: $(grep -m1 'model name' /proc/cpuinfo)"
+bash hpc/kissat_check.sh

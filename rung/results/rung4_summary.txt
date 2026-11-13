@@ -1,0 +1,7 @@
+STATUS EXHAUSTED_AND_VERIFIED
+PARAMS order=28 k=4 mode=canonical cores=89 units=89 catalogue_hash=b64cc86a0058f1b3 thresh=0
+TOTALS placements=115087822400 survivors=2401 configs=57624 costas=0
+HIST 0:0
+BEST_CORE_INTACT -1
+TIMING aggregate_cpu_seconds=2389.8 longest_unit_seconds=41.1
+VERIFIED_LOW_RECORDS 0

@@ -1,0 +1,123 @@
+{
+ "schema": "sym32-validation-manifest-v1",
+ "generator": {
+  "path": "gen_sym32_v2.py",
+  "sha256_16": "1bb56e7c07705f6f",
+  "encoding": "v2 pair-indicator; exact Costas"
+ },
+ "retired": {
+  "path": "gen_sym32.py",
+  "sha256_16": "d3b70679139fcc88",
+  "status": "RETIRED \u2014 encodes only pairwise transposition conflicts; admits non-Costas involutions (a model with 112 repeated displacements was found). All results from it are VOID."
+ },
+ "split": {
+  "path": "split_certified.py",
+  "sha256_16": "459480444ea02a44",
+  "checker": "check_split.py",
+  "checker_sha256_16": "762dc5ea5e832e07",
+  "targets": "gen_sym32_v2 (was gen_sym32 v1 \u2014 DEFECT, fixed)",
+  "identity_check": "full canonical CNF digest, not variable/clause counts"
+ },
+ "harness": {
+  "test_historical158.py": "14c4e8700f73c967",
+  "gen_sym_v2_parameterised.py": "320b951bc206c03e",
+  "test_soundness.py": "37ffaf4817176721",
+  "test_completeness.py": "253de72280b39a2c",
+  "test_projection_equivalence.py": "34f586ccd42df298"
+ },
+ "solvers": {
+  "kissat": "4.0.4",
+  "dagster": "built from dagster-main",
+  "cudd": "3.0.0"
+ },
+ "regression_assertions": {
+  "n8": {
+   "regions": 39,
+   "direct_solutions": 18,
+   "v2_models": 18,
+   "rejected_direct": 0,
+   "invalid_models": 0
+  },
+  "n10": {
+   "regions": 106,
+   "direct_solutions": 28,
+   "v2_models": 28,
+   "rejected_direct": 0,
+   "invalid_models": 0
+  },
+  "historical_n12_22": {
+   "tested": 158,
+   "accepted": 158,
+   "rejected": 0
+  },
+  "split_F0137": {
+   "encoding": "v2",
+   "children": 27,
+   "coverage": "UNSAT",
+   "disjoint_pairs": 351,
+   "disjoint_unsat": 351,
+   "parent_cnf_sha256_16": "d5e79b689d7cded4",
+   "note": "v1 gave 22 children; v2 keeps edges v1's seed filter removed. The v1 certificate is superseded, not inherited."
+  },
+  "projection_equivalence": {
+   "blocking": "edge projection over all edge variables of the region (never the complete assignment)",
+   "n8": {
+    "regions": 39,
+    "solver_calls": 57,
+    "projected": 18,
+    "direct": 18,
+    "invalid": 0,
+    "duplicate": 0,
+    "missing": 0,
+    "extra": 0,
+    "set_digest": "2247552e2506108c"
+   },
+   "n10": {
+    "regions": 106,
+    "solver_calls": 134,
+    "projected": 28,
+    "direct": 28,
+    "invalid": 0,
+    "duplicate": 0,
+    "missing": 0,
+    "extra": 0,
+    "set_digest": "c5067410de45442a"
+   },
+   "multiplicity": "one order-10 edge projection has at least 64 complete models differing only in unrealised indicators; none survives the projection blocker",
+   "solver": "kissat 4.0.4"
+  }
+ },
+ "status": "encoding validated in both directions; pilot-ready",
+ "not_established": [
+  "order-32 region satisfiability",
+  "campaign cost",
+  "whether Dagster or certified splitting beats direct kissat",
+  "DRAT proofs for any final non-existence claim"
+ ],
+ "harness_self_contained": true,
+ "archived_inputs": {
+  "parameterised_generator": "validation/gen_sym_v2_parameterised.py",
+  "historical_catalogue": "validation/historical_involutive_costas_12_22.txt",
+  "catalogue_sha256_16": "492444877a3026b1",
+  "note": "no /tmp dependencies; KISSAT path from environment"
+ },
+ "projection": {
+  "path": "project.py",
+  "sha256_16": "83b10369ada4a30a",
+  "censoring": "L_i = t_i completed, c_i censored; RMST to horizon; no unrestricted mean",
+  "reports": [
+   "sample observed-work lower bound (deterministic)",
+   "population restricted-work projection N_f*RMST_f(cap) (extrapolation, through-horizon only)"
+  ],
+  "does_not_report": "unrestricted mean; beyond-cap work is unidentified"
+ },
+ "readme_sha256_16": "2afd7ad9c2bf3782",
+ "solver_provenance_required_at_runtime": [
+  "realpath($KISSAT)",
+  "executable sha256",
+  "version/revision",
+  "build options",
+  "full command line",
+  "host architecture"
+ ]
+}

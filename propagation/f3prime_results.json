@@ -1,0 +1,14 @@
+{"experiment":"F3-prime","schedule_umax":8,"schedule_tuned":false,
+ "gate":{"solution_sets":"identical","tree":"N_l3tm <= 0.90 N_l3","work":"W_l3tm <= 1.25 W_l3",
+         "operational":"t_l3tm < t_l3 on a majority"},
+ "runs":[
+ {"order":11,"propagator":"inc","solutions":4368,"nodes":1437514,"work_l3":0,"work_tm":0,"wall_seconds":0.111,"hash_xor":"8dce443d4be66160","hash_sum":"9460ce6d377e8d30"},
+ {"order":11,"propagator":"l3","solutions":4368,"nodes":379290,"work_l3":454579655,"work_tm":0,"wall_seconds":5.001,"hash_xor":"8dce443d4be66160","hash_sum":"9460ce6d377e8d30"},
+ {"order":11,"propagator":"l3tm","solutions":4368,"nodes":259414,"work_l3":441551120,"work_tm":38024970,"wall_seconds":5.915,"hash_xor":"8dce443d4be66160","hash_sum":"9460ce6d377e8d30"},
+ {"order":12,"propagator":"inc","solutions":7852,"nodes":6977361,"work_l3":0,"work_tm":0,"wall_seconds":0.586,"hash_xor":"6da28142bf87d580","hash_sum":"17cd79e18572884c"},
+ {"order":12,"propagator":"l3","solutions":7852,"nodes":1522289,"work_l3":2935794821,"work_tm":0,"wall_seconds":31.813,"hash_xor":"6da28142bf87d580","hash_sum":"17cd79e18572884c"},
+ {"order":12,"propagator":"l3tm","solutions":7852,"nodes":1119809,"work_l3":2864334935,"work_tm":209664080,"wall_seconds":36.771,"hash_xor":"6da28142bf87d580","hash_sum":"17cd79e18572884c"},
+ {"order":13,"propagator":"inc","solutions":12828,"nodes":33831238,"work_l3":0,"work_tm":0,"wall_seconds":3.142,"hash_xor":"ad61ad11e1ffa9d0","hash_sum":"656ff25b99244afc"},
+ {"order":13,"propagator":"l3","solutions":12828,"nodes":5785132,"work_l3":16481874586,"work_tm":0,"wall_seconds":174.373,"hash_xor":"ad61ad11e1ffa9d0","hash_sum":"656ff25b99244afc"},
+ {"order":13,"propagator":"l3tm","solutions":12828,"nodes":4175962,"work_l3":16080448718,"work_tm":1011238240,"wall_seconds":197.126,"hash_xor":"ad61ad11e1ffa9d0","hash_sum":"656ff25b99244afc"}],
+ "verdict":{"scientific":"PASS","operational":"FAIL","summary":"structural pass: 26-32% tree reduction for ~4% extra deterministic work; 12-18% slower in wall time"}}

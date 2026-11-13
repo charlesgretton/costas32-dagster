@@ -1,0 +1,347 @@
+\section{The search and its tree}
+\label{sec:tree}
+The search fills columns from left to right. A node is a partial assignment $p_0,\dots,p_{c-1}$ that is
+Costas-valid so far: its rows are distinct, and at every lag the vertical differences are distinct. For
+each new column the search tries every unused row, checking the new dot's displacements against a
+bitmask of the differences already used at each lag. The first column's row is restricted to
+$p_0\le\lfloor(n-1)/2\rfloor$, which uses the vertical-complement symmetry $p\mapsto n-1-p$ to halve the
+tree, as in the measurements of Paper~1. Nothing else is pruned.
+
+The implementation, \texttt{estimate/costas\_tree.c}, was written afresh for this study and shares no code
+with the project's earlier solvers. It reproduces their exact tree sizes at every order where both have
+been run, differing by exactly one because Paper~1 also counts the empty root:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+order & nodes, this search & nodes, Paper~1 & solutions \\
+\midrule
+11 & 789{,}511 & 789{,}512 & 2{,}509 \\
+12 & 3{,}488{,}680 & 3{,}488{,}681 & 3{,}926 \\
+13 & 18{,}290{,}043 & 18{,}290{,}044 & 7{,}077 \\
+14 & 83{,}176{,}084 & 83{,}176{,}085 & 8{,}626 \\
+\bottomrule
+\end{tabular}
+\caption{Exact tree sizes. At even orders the solution counts are exactly half the published totals
+(7{,}852 and 17{,}252), as the symmetry restriction requires; at odd orders arrays whose first dot is in
+the middle row are kept whole, so the counts exceed half.}
+\label{tab:exact}
+\end{table}
+
+\section{Estimators and their validation}
+\label{sec:validation}
+Knuth's estimator~\cite{knuth1975} follows a random path from the root, choosing uniformly among the
+valid children at each level. If the path meets $d_1,d_2,\dots$ children at successive levels, the
+quantity $d_1+d_1d_2+d_1d_2d_3+\cdots$ is an unbiased estimate of the number of nodes, and averaging
+independent probes reduces its variance. The \emph{stratified} variant enumerates every node at a fixed
+depth $D$ exactly, counting the nodes above it exactly, and then probes beneath each frontier node,
+which removes the variance contributed by the top of the tree. In both cases the standard error is
+computed from the spread of the probes.
+
+The estimators were validated against the exact counts at orders 12 to 16, three runs per order.
+Every estimate is within $0.32\%$ of the exact count, and in all 15 runs the exact count lies within
+two standard errors of the estimate.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+order & Knuth, $10^6$ probes & stratified, $D=3$ & stratified, $D=4$ \\
+\midrule
+12 & $-0.02\%$ ($\pm0.16\%$) & $+0.27\%$ ($\pm0.44\%$) & $-0.04\%$ ($\pm0.29\%$) \\
+13 & $+0.03\%$ ($\pm0.17\%$) & $-0.13\%$ ($\pm0.40\%$) & $+0.04\%$ ($\pm0.26\%$) \\
+14 & $-0.12\%$ ($\pm0.19\%$) & $+0.32\%$ ($\pm0.40\%$) & $+0.13\%$ ($\pm0.24\%$) \\
+15 & $-0.15\%$ ($\pm0.20\%$) & $-0.09\%$ ($\pm0.37\%$) & $-0.20\%$ ($\pm0.22\%$) \\
+16 & $-0.08\%$ ($\pm0.21\%$) & $-0.10\%$ ($\pm0.37\%$) & $+0.10\%$ ($\pm0.21\%$) \\
+\bottomrule
+\end{tabular}
+\caption{Error of each estimate against the exact count, with two standard errors in parentheses. The
+exact counts at orders 15 and 16 are those of Paper~1.}
+\label{tab:validation}
+\end{table}
+
+Kilby, Slaney, Thi\'ebaux and Walsh describe weighted-backtrack and recursive estimators that improve
+on Knuth's for uneven trees~\cite{kilby2006}. They were not implemented here. The Costas tree turns out
+to be regular enough that plain probing is accurate and well calibrated, both at these orders and,
+as Section~\ref{sec:cluster} shows, in genuine order-32 subtrees.
+
+\section{The order-32 tree}
+\label{sec:order32}
+Five independent estimates at order 32 agree closely:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+method & estimate & standard error \\
+\midrule
+Knuth, $2\times10^6$ probes, seed 21 & $1.5365\times10^{20}$ & $0.17\%$ \\
+Knuth, $2\times10^6$ probes, seed 22 & $1.5409\times10^{20}$ & $0.17\%$ \\
+Knuth, $2\times10^6$ probes, seed 23 & $1.5438\times10^{20}$ & $0.17\%$ \\
+stratified, $D=3$, 14{,}640 frontier nodes & $1.5374\times10^{20}$ & $0.19\%$ \\
+stratified, $D=4$, 408{,}470 frontier nodes & $1.5354\times10^{20}$ & $0.12\%$ \\
+\bottomrule
+\end{tabular}
+\caption{Estimates of the order-32 tree. Their inverse-variance mean is $1.538\times10^{20}$ nodes, with a
+relative standard error of $0.07\%$.}
+\label{tab:order32}
+\end{table}
+
+\noindent There is no sign of a heavy tail: no single probe contributes more than $0.02\%$ of any total.
+At orders 29, 30 and 31 the estimates are $1.566\times10^{18}$, $7.097\times10^{18}$ and
+$3.406\times10^{19}$, so the tree grows by factors of $4.53$, $4.80$ and $4.52$ per order from 29 to 32,
+and by $98.2$ in all. The alternation comes from the symmetry restriction, which keeps the middle row
+whole at odd orders. The growth agrees with Paper~1's measured ratio of $4.80$ per order at orders 11 to
+16, which extrapolated from order 16 gives $1.6\times10^{20}$.
+
+\section{Measurements on a cluster node}
+\label{sec:cluster}
+The same program was run on one node of the cluster used for the campaign of Paper~8: two Intel Xeon
+Sapphire Rapids processors, 104 cores in all, with the \texttt{powersave} frequency governor and turbo
+enabled. The job cost 78 service units.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+measurement at order 32 & value \\
+\midrule
+node rate, one core alone & $3.72\times10^6$ nodes/s \\
+node rate per core, all 104 cores busy & $3.14\times10^6$ nodes/s (range $3.13$--$3.16$) \\
+node rate per node & $3.27\times10^8$ nodes/s \\
+slowdown of a fully loaded node & $1.18$ \\
+tree size, 8 independent Knuth runs & $1.5381\times10^{20}$ (relative s.e.\ $0.06\%$) \\
+\bottomrule
+\end{tabular}
+\caption{Cluster measurements. The single-core rate equals the virtual machine's, and the tree estimate
+agrees with Table~\ref{tab:order32} to within $0.01\%$.}
+\label{tab:cluster}
+\end{table}
+
+The validation of Section~\ref{sec:validation} used orders 12 to 16. The cluster run also tested the
+estimator on genuine order-32 subtrees. Each of 192 cores took a random path to depth 8 or 9 of the
+order-32 tree, estimated the subtree below with 5{,}000 probes, and then counted it exactly.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+& depth 8 & depth 9 \\
+\midrule
+subtrees counted exactly & 96 of 96 & 96 of 96 \\
+median subtree size & $1.51\times10^9$ nodes & $7.69\times10^7$ nodes \\
+exact count within two standard errors & $93.8\%$ & $94.8\%$ \\
+total of estimates / total of exact counts & $0.9965$ & $1.0002$ \\
+\bottomrule
+\end{tabular}
+\caption{The estimator on order-32 subtrees. No subtree reached the 30-minute time cap, so none was
+excluded.}
+\label{tab:deepval}
+\end{table}
+
+\noindent The coverage is close to the nominal $95\%$, and across the depth-8 subtrees, about
+$1.5\times10^{11}$ nodes in all, the estimates' total is within $0.35\%$ of the exact one. The estimator is
+therefore validated in the tree it is used on, not only at small orders.
+
+\section{From nodes to cost}
+\label{sec:cost}
+A campaign keeps every core busy, so the relevant rate is the fully loaded one, $3.14\times10^6$ nodes per
+core per second. At that rate the order-32 tree takes
+\[
+\frac{1.538\times10^{20}}{3.14\times10^6}\ \text{s}\approx1.36\times10^{10}\ \text{core-hours}
+\approx1.5\times10^{6}\ \text{core-years}.
+\]
+On a queue charging 2 service units per core-hour, that is about $2.7\times10^{10}$ service units, or
+27 million thousand-unit blocks (KSU). Exploiting the full symmetry group of the square, rather than the
+single symmetry used here, would save at most a further factor of about four. Neither figure is within
+reach of any allocation.
+
+\section{Latency}
+\label{sec:latency}
+How long a campaign takes depends on how evenly its work divides. The cluster run estimated the subtree
+below every one of the 408{,}470 nodes at depth 4, each with 20 probes, and scheduled them as tasks,
+largest first, onto the least-loaded worker. The work is fairly even: the largest task is $34.7$ times
+the mean, $1.15\times10^6$ core-hours, and the largest $1\%$ of tasks hold $3.8\%$ of the work.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+workers & wall time & efficiency & charged KSU \\
+\midrule
+104 & about 14{,}900 years & $100.0\%$ & $2.71\times10^7$ \\
+1{,}040 & about 1{,}490 years & $100.0\%$ & $2.71\times10^7$ \\
+10{,}400 & about 149 years & $99.7\%$ & $2.72\times10^7$ \\
+104{,}000 & about 131 years & $11.3\%$ & $2.39\times10^8$ \\
+\bottomrule
+\end{tabular}
+\caption{Wall time and charged cost of the straightforward search, with depth-4 tasks.}
+\label{tab:latency}
+\end{table}
+
+\noindent Up to about $10^4$ workers, depth-4 tasks keep every core busy. Beyond that the largest task
+exceeds the ideal wall time, and efficiency collapses unless the work is split more finely. The wall
+times put the straightforward search beyond reach at any scale. A method costing about $10^4$ core-years,
+as Section~\ref{sec:legacy} suggests for the 2011 method, would need about a year on $10^4$ cores,
+provided its work divides as evenly.
+
+\section{The 2011 enumeration was far more efficient}
+\label{sec:legacy}
+Paper~1 projected the order-32 search at $10^3$--$10^4$ modern core-years by scaling the reported cost of
+the 2011 order-29 enumeration, 366.55 CPU-years~\cite{drakakis29}. The present search would need about
+13{,}400 core-years at order 29, so the 2011 method was at least 36 times more efficient, and more once
+the slower hardware of 2010 is allowed for. Paper~1's projection is therefore a statement about that
+method, not about a straightforward column-by-column search. Section~\ref{sec:engineering} shows that
+most of the gap is recoverable by engineering.
+
+Scaling the 2011 cost by the measured growth from order 29 to 32, a factor of 98 rather than the $5^3=125$
+of a five-fold-per-order rule, gives about 36{,}000 CPU-years on 2010 hardware. If per-core speed has
+improved two- to four-fold since then, an assumption that has not been measured, that is
+9{,}000--18{,}000 modern core-years, or about 160{,}000--320{,}000 KSU on a 2-unit queue, and up to about 370{,}000 allowing for the
+slowdown of a fully loaded node measured in Section~\ref{sec:cluster}. This assumes that
+the 2011 method's tree grows like the present one; its algorithm has not been reproduced here.
+
+\section{Engineering the search}
+\label{sec:engineering}
+Most of the 2011 method's advantage turns out to be recoverable by engineering the same search. Three
+changes were tested, each first validated against exact counts.
+
+\paragraph{Bit-parallel candidate rows.} The search of Section~\ref{sec:tree} tests each candidate row
+against every earlier column, $O(n\cdot c)$ work to expand a node at column $c$. Row $r$ conflicts with
+column $i$ exactly when the difference $r-p_i$ is already used at lag $c-i$, so the rows forbidden by
+column $i$ are the used-difference mask of that lag, shifted into row coordinates. ORing these masks gives
+every forbidden row at once, in $O(c)$ word operations per node. The tree is unchanged: node and
+solution counts are identical at orders 10 to 14. At order 32 the rate rises from $3.33\times10^6$ to
+$1.68\times10^7$ nodes per second on the same core, a factor of $5.0$.
+
+\paragraph{Column order.} Four orders were compared, all with the same symmetry restriction, which applies
+to whichever column is placed first.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+order & left to right & outside in & middle out & fewest legal rows \\
+\midrule
+12 & $3.49\times10^6$ ($0.36$\,s) & $1.22\times10^7$ ($1.39$\,s) & $3.49\times10^6$ ($0.44$\,s) & $2.42\times10^6$ ($1.22$\,s) \\
+13 & $1.83\times10^7$ ($2.19$\,s) & $7.81\times10^7$ ($8.86$\,s) & $1.79\times10^7$ ($1.95$\,s) & $1.22\times10^7$ ($7.58$\,s) \\
+14 & $8.32\times10^7$ ($12.5$\,s) & $4.38\times10^8$ ($55.9$\,s) & $8.32\times10^7$ ($11.5$\,s) & $5.38\times10^7$ ($35.6$\,s) \\
+\bottomrule
+\end{tabular}
+\caption{Nodes and time for four column orders. ``Fewest legal rows'' chooses at each node the unplaced
+column with fewest legal rows and abandons a branch when any column has none.}
+\label{tab:orders}
+\end{table}
+
+\noindent Any order that keeps the placed columns contiguous gives the same tree, because whether a block
+of dots is Costas does not depend on where the block sits; at even orders the counts for left to right and
+middle out are identical. Placing dots far apart, outside in, wastes the short-lag constraints, which prune
+hardest, and gives a tree five times larger by order 14. Choosing the column with fewest legal rows shrinks
+the tree increasingly, to $65\%$ of the baseline at order 14, and its growth per order is about $4.65$
+against $4.84$. But each node costs about three times as much, so it is slower at every order measured.
+
+Orders that place a column between two earlier ones need one more check than left to right. A new dot
+forms two pairs at the same lag $L$, one on each side, and these collide exactly when its row is the
+midpoint of the other two, $2r=p_{c-L}+p_{c+L}$: the Ladendorf condition of the 2009 search. A first
+version of these searches omitted the check and accepted non-Costas arrays; the validation against exact
+array counts caught it before any result was used.
+
+\paragraph{Full symmetry pruning.} Using all eight symmetries of the square, the search keeps exactly one
+array per class: the lexicographically smallest of its eight images. A prefix is cut when some image is
+guaranteed to be smaller for every completion. An image entry is either known, or confined to an interval:
+an unplaced row's column lies among the unplaced columns. The vertical flip compares known values; the four
+symmetries involving transposition can often be decided early from the partly known inverse; the horizontal
+flip and the half-turn are decided only near the leaves. The pruning is exact: at every order from 4 to
+13 the search outputs precisely the class representatives found by enumerating every Costas array and
+grouping them by symmetry, including 990 classes among 7{,}852 arrays at order 12 and 1{,}616 among 12{,}828
+at order 13. On the pruned tree the estimator is within $0.3\%$ of the exact counts at orders 13 to 15.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+order & one symmetry & all eight & fewer nodes \\
+\midrule
+12 & $3{,}488{,}680$ & $1{,}544{,}404$ & $2.26\times$ \\
+13 & $18{,}290{,}043$ & $7{,}509{,}524$ & $2.44\times$ \\
+14 & $83{,}176{,}084$ & $37{,}132{,}082$ & $2.24\times$ \\
+15 & $435{,}090{,}280$ & $182{,}409{,}077$ & $2.39\times$ \\
+\bottomrule
+\end{tabular}
+\caption{Nodes with one and with all eight symmetries, in the bit-parallel search.}
+\label{tab:symmetry}
+\end{table}
+
+\noindent At order 32 three independent estimates put the pruned tree at $7.22\times10^{19}$ nodes, $2.13$
+times smaller, while the extra comparisons lower the rate to $1.42\times10^7$ nodes per second. The search is
+about $1.8$ times faster overall: less than the theoretical four, because two of the symmetries can be
+decided only near the leaves.
+
+\paragraph{The revised cost.} With the fully loaded slowdown of Section~\ref{sec:cluster}:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+search & core-hours & core-years & KSU \\
+\midrule
+as in Section~\ref{sec:cost} & $1.36\times10^{10}$ & $1.55\times10^6$ & $2.7\times10^7$ \\
+bit-parallel candidate rows & $3.0\times10^{9}$ & $3.4\times10^5$ & $6.0\times10^6$ \\
+and full symmetry pruning & $1.7\times10^{9}$ & $1.9\times10^5$ & $3.3\times10^6$ \\
+\bottomrule
+\end{tabular}
+\caption{The cost of the order-32 search, before and after engineering.}
+\label{tab:revised}
+\end{table}
+
+\noindent The engineered search is about eight times cheaper, but still about 18 years on $10^4$ cores. At
+order 29 it would need about 1{,}650 core-years against the 2011 enumeration's 366.55 CPU-years, so a factor
+of four to five remains, more if 2010 hardware was slower per core. Whether that factor lies in node rate or
+in a smaller tree is not known. For comparison, a 2026 preprint estimates by sampling that an
+unrestricted order-28 search with its software would take 43.7 CPU-years, and projects 7.97 GPU-years
+at order 30~\cite{dumitru2026localpatterns}. Reductions in the growth per order compound: the fewest-legal-rows order
+lowers it from $4.84$ to about $4.65$, which over the orders up to 32 is worth about three times, if its
+per-node cost could be brought down to the baseline's. Paper~10 measures a related attempt: binary
+displacement consistency, which maintains the domains that order needs, reduced the forward-checking tree
+about fourfold at order 14 but made complete searches slower, and was not retained.
+
+\section{Implications for a distributed SAT campaign}
+\label{sec:sat}
+A planning model for a distributed SAT campaign can be written
+\[
+K_{\mathrm{SAT}}=K_{\mathrm{ref}}\,\frac{\mu}{S},
+\]
+where $K_{\mathrm{ref}}$ is the cost of a reference enumeration, $S$ the improvement of a modern direct
+method over it, and $\mu$ the overhead of SAT and its decomposition over that direct method. Both
+factors can now be bounded from measurements in this volume.
+\begin{itemize}
+\item Relative to the 2011 method, the straightforward modern search is not faster but at least 36
+times slower, so $S>1$ requires an algorithm better than the 2011 one, which no one in this
+investigation has shown.
+\item For the transpose-symmetric subclass, the SAT campaign of Paper~8 used about 490 times the
+computation of the direct search later run to completion, so $\mu$ was of that order, not a small constant. Even $\mu=5$ applied to
+the 2011 method's scaled cost gives about 0.8--1.6 million KSU.
+\end{itemize}
+On cost, therefore, a distributed SAT campaign is not a viable route to the unrestricted problem. The
+only candidate is a direct enumeration at least as efficient as the 2011 method, distributed through a
+fail-closed task queue, at a cost of order $10^5$ KSU on present assumptions. Before any allocation is
+requested, that method should be reproduced and its rate and tree measured at orders where they can be
+checked, such as 20 to 24; the estimator validated here makes that calibration cheap.
+
+\section{Limitations}
+\label{sec:limits}
+The main estimates describe one search, with columns filled from left to right and one symmetry used;
+Section~\ref{sec:engineering} measures three changes to it. Other
+filling orders, such as from the middle outwards, give different trees, and the 2011 method's tree is
+not measured here. The node rates were measured on one virtual machine and one cluster node. The weighted-backtrack and recursive estimators were not implemented. The improvement in
+per-core speed since 2010 is an assumption.

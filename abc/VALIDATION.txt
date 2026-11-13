@@ -1,0 +1,29 @@
+# A/B/C validation and build record
+date_utc: 2026-10-21T00:59:29Z
+compiler: gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+flags: -O3 -march=native
+cpu: Intel(R) Xeon(R) Processor @ 2.10GHz
+abc.c sha256: 9bccf63d90bbb568980b45c92683aba41a4351bb08326835d972ae9cc0afb4a6
+
+## solution sets (vertical-flip symmetry; whole search; each config must match)
+order 8  config A  solutions 222  solution-set sha256 2569bfb1287d3c56
+order 8  config B  solutions 222  solution-set sha256 2569bfb1287d3c56
+order 8  config C  solutions 222  solution-set sha256 2569bfb1287d3c56
+order 9  config A  solutions 446  solution-set sha256 80b4a4ba8e506d65
+order 9  config B  solutions 446  solution-set sha256 80b4a4ba8e506d65
+order 9  config C  solutions 446  solution-set sha256 80b4a4ba8e506d65
+order 10  config A  solutions 1080  solution-set sha256 932a375d118ecb0f
+order 10  config B  solutions 1080  solution-set sha256 932a375d118ecb0f
+order 10  config C  solutions 1080  solution-set sha256 932a375d118ecb0f
+order 11  config A  solutions 2509  solution-set sha256 7594d44579c5a450
+order 11  config B  solutions 2509  solution-set sha256 7594d44579c5a450
+order 11  config C  solutions 2509  solution-set sha256 7594d44579c5a450
+order 12  config A  solutions 3926  solution-set sha256 a18a17048b074da2
+order 12  config B  solutions 3926  solution-set sha256 a18a17048b074da2
+order 12  config C  solutions 3926  solution-set sha256 a18a17048b074da2
+order 13  config A  solutions 7077  solution-set sha256 0b7e2cd5676b8938
+order 13  config B  solutions 7077  solution-set sha256 0b7e2cd5676b8938
+order 13  config C  solutions 7077  solution-set sha256 0b7e2cd5676b8938
+order 14  config A  solutions 8626  solution-set sha256 4d1006a3f9eb582e
+order 14  config B  solutions 8626  solution-set sha256 4d1006a3f9eb582e
+order 14  config C  solutions 8626  solution-set sha256 4d1006a3f9eb582e

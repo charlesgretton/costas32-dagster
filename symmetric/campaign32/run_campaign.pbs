@@ -1,0 +1,63 @@
+#!/bin/bash
+# Order-32 transpose-symmetric Costas search: exhaustive direct search over all involutions, split into
+# independent tasks and run on one full 104-core node. A fourth determination of the order-32 result.
+#   Submit from this directory:   qsub run_campaign.pbs
+#   Resume after an interruption:  qsub run_campaign.pbs   (same CAMPAIGN_DIR; finished chunks are skipped)
+# Expected: ~20 core-hours of search, ~15-20 minutes wall on 104 cores, about 50-100 SU.
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=104,mem=100GB,walltime=01:30:00,jobfs=8GB
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas32-inv
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-.}"
+set +u; ENV=../sym32_sat/hpc/env.sh; [ -f "$ENV" ] && source "$ENV"; set -u
+if command -v module >/dev/null 2>&1; then module load python3/3.11.0 2>/dev/null || true; fi
+# Results go to $COSTAS_DATA; set it to a scratch directory on your cluster.
+COSTAS_DATA=${COSTAS_DATA:-$HOME/costas32_data}
+N=${N:-32}; DEPTH=${DEPTH:-3}; NW=${NW:-104}; CHUNK=${CHUNK:-25}
+SELFTEST_ORDERS=${SELFTEST_ORDERS:-16 18 20 22 24}
+OUT=${CAMPAIGN_DIR:-$COSTAS_DATA/campaign32_inv_n$N}; mkdir -p "$OUT/chunks" "$OUT/results"
+log(){ echo "[$(date +%T)] $*" | tee -a "$OUT/progress.log"; }
+log "campaign directory: $OUT   (job ${PBS_JOBID:-local}, python $(python3 --version 2>&1))"
+# preflight: the campaign directory must accept writes. A full project quota once made chunks fail
+# instantly; this check stops the job before any search instead.
+PREFLIGHT_TARGET=${PREFLIGHT_TARGET:-$OUT/.preflight}
+if ! dd if=/dev/zero of="$PREFLIGHT_TARGET" bs=1M count=8 status=none 2>/dev/null; then
+  rm -f "$OUT/.preflight"; log "ABORT: cannot write to $OUT (disk or inode quota full?). Check your quota, or set CAMPAIGN_DIR elsewhere."; exit 4; fi
+rm -f "$OUT/.preflight"; log "preflight write test passed"
+
+log "build"
+g++ -O3 -march=native -o "$OUT/inv32" inv32.cpp
+{ g++ --version | head -1; lscpu | grep -E "Model name|^CPU\(s\)"; sha256sum inv32.cpp merge.py selftest.sh run_campaign.pbs "$OUT/inv32"; } > "$OUT/build_${PBS_JOBID:-local}.txt"
+
+log "self-test at orders $SELFTEST_ORDERS (must pass before any order-$N work)"
+BIN="$OUT/inv32" WORKERS="$NW" DEPTH="$DEPTH" ORDERS="$SELFTEST_ORDERS" TMPDIR="${PBS_JOBFS:-/tmp}" ./selftest.sh | tee -a "$OUT/progress.log"
+
+log "split order $N at depth $DEPTH"
+"$OUT/inv32" split "$N" "$DEPTH" > "$OUT/tasks.new"
+if [ -f "$OUT/tasks.txt" ]; then
+  cmp -s "$OUT/tasks.txt" "$OUT/tasks.new" || { log "ABORT: regenerated task list differs from the existing one"; exit 3; }
+  rm "$OUT/tasks.new"; log "resuming: task list identical to the previous run"
+else
+  mv "$OUT/tasks.new" "$OUT/tasks.txt"
+  ( cd "$OUT/chunks" && grep '^T' ../tasks.txt | split -d -a 5 -l "$CHUNK" - chunk_ )
+fi
+log "$(tail -1 "$OUT/tasks.txt")"
+TODO=$(cd "$OUT/chunks" && for c in chunk_*; do [ -f "../results/$c.out" ] || echo "$c"; done | wc -l)
+log "$TODO of $(ls "$OUT/chunks" | wc -l) chunks to run on $NW workers"
+: > "$OUT/failed_chunks.txt"
+
+( cd "$OUT/chunks" && for c in chunk_*; do [ -f "../results/$c.out" ] || echo "$c"; done ) \
+ | { set +e; xargs -P "$NW" -I{} sh -c "\"$OUT/inv32\" run $N < \"$OUT/chunks/{}\" > \"$OUT/results/{}.part\" 2> \"$OUT/results/{}.err\" && mv \"$OUT/results/{}.part\" \"$OUT/results/{}.out\" || { echo \"{} exit=\$?\" >> \"$OUT/failed_chunks.txt\"; exit 1; }"; echo $? > "$OUT/xargs_status"; }
+XS=$(cat "$OUT/xargs_status")
+NFAIL=$( [ -f "$OUT/failed_chunks.txt" ] && wc -l < "$OUT/failed_chunks.txt" || echo 0 )
+log "chunk runner finished: xargs status $XS; failed chunks this run: $NFAIL (listed in failed_chunks.txt; their stderr in results/*.err)"
+find "$OUT/results" -name '*.err' -size 0 -delete
+
+log "merge"
+set +e; python3 merge.py "$OUT/tasks.txt" "$OUT/results" --json "$OUT/summary.json" > "$OUT/summary.txt"; ST=$?; set -e
+cat "$OUT/summary.txt" | tee -a "$OUT/progress.log"
+if [ $ST -eq 0 ]; then log "DONE: $(python3 -c "import json;print(json.load(open('$OUT/summary.json'))['verdict'])")"
+else log "INCOMPLETE: resubmit the same job to finish the remaining chunks (see $OUT/results/missing_tasks.txt)"; fi

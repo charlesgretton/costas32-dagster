@@ -1,0 +1,48 @@
+
+\chapter*{Conclusions of the investigation}
+\addcontentsline{toc}{chapter}{Conclusions of the investigation}
+
+\paragraph{What has been excluded.} Any order-32 Costas array must be geometrically asymmetric
+(known since 1993, and independently re-determined in Paper~8 both by SAT and by an exhaustive direct
+search); must not arise from the unmodified Welch
+or Golomb constructions, and none of the construction families examined in Paper~1 reaches order
+32; must not be circular; must have no Costas deletion minor of order 28 or 29 (Paper~3, relative to
+the published censuses); and must not be a two-point augmentation of any of the 664 generated
+order-30 cores (Paper~2). These conditions are necessary, not sufficient, and together they do not
+define a tractable residual enumeration.
+
+\paragraph{What remains possible.} An order-32 Costas array with none of these structures. Nothing in
+this volume bounds that class from above, and exhaustive enumeration of all order-32 permutations
+is out of reach: Paper~9 measures it at about $1.9\times10^5$ core-years for the best search engineered here, about 18
+years on $10^4$ cores, and
+estimates $10^4$ for the fastest published method. Paper~6's conditional model suggests the class is very probably empty, but it is a
+heuristic, and an equally good fit reverses it.
+
+\paragraph{What is proved.} The deductive results are the soundness of the telescoping rule
+(Paper~5), the diagonal parity floor (Paper~7), the classification of possible stabilisers, the
+fixed-point partition and the exactness of the regional encoding (Paper~8), and the elementary
+results of Paper~1. Everything else is computational: complete and, where stated, audited or
+independently re-scored, but not certified. Only Paper~4's representatives are machine-checked.
+
+\paragraph{Closed directions.} Several plausible routes were tested and closed, each for a stated reason:
+the telescoping propagator as a speed-up (Paper~5), the dyadic filtration and, with an explicit witness,
+unlabelled dyadic Fourier summaries including the M10 transform (Paper~7), SAT as a cheaper route to
+the symmetric case (Paper~8), and the search for obstructions shorter than search, through local rules,
+clause learning, cutting planes and a hierarchy of linear relaxations (Paper~10). The last found a genuine
+obstruction language, the pair-marginal relaxation, but one that becomes complete only near half depth,
+where the order-32 tree is widest.
+
+\paragraph{What is worth continuing.} In order of value for cost:
+\begin{enumerate}[nosep]
+\item a systematic literature search for every strand, before publication, given that Paper~8's
+result had been published in 1993;
+\item reproducing the 2011 enumeration method and measuring its tree and rate at orders 20 to 24, which
+would turn Paper~9's estimate for the general search, about $10^5$ KSU, into a calibrated figure;
+\item complete bibliographic data, a persistent identifier for the archive, full hashes and a
+volume-wide claim manifest;
+\item an aggregate build of Paper~4's Lean development, a compact certificate for Paper~7's
+union-find search, and proof certificates for representative regions of Paper~8.
+\end{enumerate}
+The investigation's broader result is a map: where structural reasoning reaches at order 32, where
+it stops, and which apparently promising approaches do not provide a practical or logically
+sufficient attack.

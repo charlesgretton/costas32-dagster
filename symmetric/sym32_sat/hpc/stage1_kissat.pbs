@@ -1,0 +1,15 @@
+#!/bin/bash
+# STAGE 1 -- Arm A only (direct Kissat) on the whole stratified sample. Answers Q1:
+# is direct Kissat sufficient?  One 104-core node, 104 single-core shards.
+# Cost ceiling: 225 regions x 600 s = 37.5 core-hours.        qsub hpc/stage1_kissat.pbs
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=104,mem=480GB,walltime=02:00:00,jobfs=8GB
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas-s1
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-.}"; source hpc/env.sh
+OUT="$COSTAS_DATA/results/stage1_${PBS_JOBID:-local}"
+bash hpc/run_shards.sh "$COSTAS_DATA/sample.txt" "$OUT" "${CAP:-600}" A 1 104
+python3 hpc/stage_report.py "$OUT/ledger.jsonl" kissat | tee "$OUT/report.txt"

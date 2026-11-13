@@ -1,0 +1,146 @@
+{
+ "N32_shuffles": [
+  {
+   "action": "rows and columns, rotation",
+   "costas": 0,
+   "defect_max": 44,
+   "defect_min": 30,
+   "dihedral_images_of_N32": 0,
+   "images": 32,
+   "permutations": 32
+  },
+  {
+   "action": "columns only, rotation",
+   "costas": 0,
+   "defect_max": 32,
+   "defect_min": 11,
+   "dihedral_images_of_N32": 0,
+   "images": 32,
+   "permutations": 32
+  },
+  {
+   "action": "whole 10-bit address, rotation",
+   "costas": 0,
+   "defect_max": 2,
+   "defect_min": 2,
+   "dihedral_images_of_N32": 8,
+   "images": 72,
+   "permutations": 8
+  },
+  {
+   "action": "rows and columns, bit reversal",
+   "costas": 0,
+   "defect_max": 74,
+   "defect_min": 74,
+   "dihedral_images_of_N32": 0,
+   "images": 8,
+   "permutations": 8
+  },
+  {
+   "action": "columns only, bit reversal",
+   "costas": 0,
+   "defect_max": 68,
+   "defect_min": 67,
+   "dihedral_images_of_N32": 0,
+   "images": 8,
+   "permutations": 8
+  },
+  {
+   "action": "whole 10-bit address, bit reversal",
+   "costas": 0,
+   "defect_max": 74,
+   "defect_min": 74,
+   "dihedral_images_of_N32": 0,
+   "images": 8,
+   "permutations": 8
+  }
+ ],
+ "defect": 55,
+ "is_permutation": true,
+ "lags_with_repeated_displacements": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  17,
+  18,
+  19,
+  21,
+  25
+ ],
+ "levels": {
+  "1": {
+   "classes_occupied": 4,
+   "max_occupancy_over_capacity": 0.2667,
+   "violations": 0
+  },
+  "2": {
+   "classes_occupied": 16,
+   "max_occupancy_over_capacity": 0.2969,
+   "violations": 0
+  },
+  "3": {
+   "classes_occupied": 64,
+   "max_occupancy_over_capacity": 0.4688,
+   "violations": 0
+  },
+  "4": {
+   "classes_occupied": 228,
+   "max_occupancy_over_capacity": 0.75,
+   "violations": 0
+  },
+  "5": {
+   "classes_occupied": 409,
+   "max_occupancy_over_capacity": 1.0,
+   "violations": 0
+  }
+ },
+ "n": 32,
+ "satisfies_every_cap_r1_to_r5": true,
+ "witness": [
+  5,
+  19,
+  25,
+  28,
+  29,
+  8,
+  0,
+  26,
+  14,
+  3,
+  31,
+  1,
+  23,
+  30,
+  2,
+  20,
+  16,
+  13,
+  18,
+  9,
+  15,
+  10,
+  22,
+  27,
+  12,
+  21,
+  7,
+  4,
+  6,
+  17,
+  11,
+  24
+ ],
+ "witness_sha256": "6c0bd6249ce6cc564b7753ea5b4f7a07811db1a8b6f8253c703ec916237d8d0c"
+}

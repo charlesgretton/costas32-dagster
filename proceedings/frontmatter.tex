@@ -1,0 +1,182 @@
+\begin{titlepage}
+\centering
+\vspace*{3cm}
+{\LARGE Costas Arrays of Order 32\par}
+\vspace{0.6cm}
+{\Large Proceedings of an Investigation\par}
+\vspace{2cm}
+{\large Charles Gretton\textsuperscript{$\ast$}\par}
+{\normalsize Australian National University\par}
+\vspace{1cm}
+{\normalsize October 2026\par}
+\vfill
+{\small\textsuperscript{$\ast$}Corresponding author:
+\href{mailto:charles.gretton@anu.edu.au}{charles.gretton@anu.edu.au}\par}
+\end{titlepage}
+
+\chapter*{Licence and errata}
+\addcontentsline{toc}{chapter}{Licence and errata}
+
+\paragraph{Licence.} \textcopyright\ 2026 Charles Gretton. This work is licensed under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).
+To view a copy of the licence, visit \url{https://creativecommons.org/licenses/by/4.0/}. The software released
+with it in the Costas-32 repository is licensed under the Apache License, Version 2.0
+(\url{https://www.apache.org/licenses/LICENSE-2.0}). Material by others that is cited or reproduced here,
+including published data and catalogues, remains under its original terms.
+
+\paragraph{Errata.} We welcome reports of errors, omissions and overlooked prior work. Please send them to the
+corresponding author, Charles Gretton, at \href{mailto:charles.gretton@anu.edu.au}{charles.gretton@anu.edu.au}.
+Every report that leads to a correction will be acknowledged in the errata and in any revised edition,
+cited as a private communication; where the point was already made in a publication that appeared before
+this report's publication date, that publication will be cited as well.
+
+\chapter*{AI usage acknowledgment}
+\addcontentsline{toc}{chapter}{AI usage acknowledgment}
+
+Large language models were used extensively throughout this investigation and in preparing this
+volume. Claude Opus 5.5 and GPT 5.6 SOL were used for the report and for the proceedings as a
+whole. Their use covered developing and checking mathematical arguments; designing, writing,
+testing and running the software; planning, monitoring and analysing the computational campaigns;
+searching and assessing the literature; and drafting, reviewing and revising the text, including
+assembling these proceedings from the project's reports.
+
+The author directed the work, decided what to run and what to claim, and checked its major
+claims. He has not made a complete inventory of the claims in this volume, nor checked each one
+individually; doing so would take far longer than the investigation itself, so errors may remain,
+and reports of them are welcome (see the errata above). What the volume provides instead is the
+means to check: each computational claim rests on released software and recorded outputs, and the
+report states how its claims were checked. The use of models also shaped the methods: much of the
+emphasis on fail-closed accounting, independent verification of every answer and hypotheses stated
+before the runs, described in the note on software engineering, exists so that results produced with heavy machine assistance can be audited without
+trusting the process that produced them.
+
+The author calls a release of this kind a \emph{virtual proceedings}: a self-contained manuscript
+published together with the code package that produced its results --- the volume and its source,
+the software needed to rerun every experiment, and the derived evidence behind every reported
+number --- as one open repository rather than through a conventional venue. The name reflects both
+how such work is now produced, largely in dialogue with AI tools under the author's direction, and
+how it is meant to be used: read, rerun and audited by others.
+
+\chapter*{Preface}
+\addcontentsline{toc}{chapter}{Preface}
+
+Orders 32 and 33 are the smallest orders for which the existence of a Costas array is unknown. This
+volume collects the results of a systematic investigation of order 32 as ten self-contained
+papers, one for each strand of the work. Each paper is readable on its own at the level of its main claim. Shared notation, recurring definitions and release conventions are collected once, in the front matter, and each paper states its dependencies on the others.
+
+The investigation does not resolve existence at order 32. What it does is close a series of
+structured routes by which an order-32 array could arise, and measure or explain why others fail.
+The table summarises the ten papers and the standing of their results.
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.04\textwidth}>{\raggedright\arraybackslash}p{0.42\textwidth}>{\raggedright\arraybackslash}p{0.44\textwidth}@{}}
+\toprule
+& result & standing \\
+\midrule
+1 & No known construction reaches order 32; no circular Costas array of order 32 exists. &
+Mostly from the literature; single periodicity remains open pending the Golomb--Taylor conjecture. \\
+2 & No order-32 array is a two-point augmentation of the 664 generated algebraic order-30 cores;
+the closest miss has a complete genealogy. & Computational; relative to the generated order-30
+catalogue. \\
+3 & No order-32 array contains an order-29 or an order-28 Costas deletion minor. &
+Computational; quantifies over complete published censuses; neither result is known to imply the other. \\
+4 & The order-29 census, reconstructed and independently verified. & Verification, partly
+kernel-checked in Lean; completeness rests on the published enumeration. \\
+5 & A telescoping-sum propagation rule, proved sound. & Passes a frozen benchmark; slows exact search
+in practice. \\
+6 & A first-moment model forecasting about $10^{-4}$ sporadic classes at order 32. & Conditional
+forecast; an equally good fit diverges. \\
+7 & At least 112 of the 240 diagonal second differences of any order-32 permutation are even. &
+Proved; does not bear on existence. \\
+8 & No transpose-symmetric Costas array of order 32 exists. & Known since 1993; determined
+independently here twice, by SAT and by exhaustive direct search. \\
+9 & An exhaustive search of all order-32 permutations, by a straightforward method, would take about $1.5\times10^6$ core-years as first written, about $1.9\times10^5$ once engineered. & Measured, with validated estimators; the faster 2011 method would need an estimated $10^4$ core-years. \\
+10 & Late dead prefixes are refuted by a pair-marginal linear relaxation; nothing tested refutes earlier prefixes more cheaply than search. & Sampled and independently replicated; caps any rule acting at the transition at about nine-fold at order 32. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Two cautions apply throughout. First, most results here are computational: they rest on the
+correctness of the software, which is released, tested and in places independently re-implemented,
+but not formally certified except where a paper says so. Each paper ends with a section stating
+the standing of its claims. Second, the result of Paper~8 turned out to have been published in 1993
+and confirmed in 2009, which the project discovered only after its own campaign was complete. The
+other strands have not yet been checked against the literature as thoroughly, and their novelty
+should be read with that in mind.
+
+Some papers point to the project's consolidated report for material outside their scope, such as
+structural approaches that were tried and refuted.
+
+\paragraph{Data and code availability.} The consolidated report, all software, Lean sources,
+catalogues, logs and result ledgers referred to in this volume are released together as one software
+archive (release \texttt{costas32-1.3}), whose manifest records the hash of every file. A persistent
+identifier for the archive is to be assigned on deposit.
+
+\paragraph{Dependencies and standing.} The table records, for each paper, the kind of result, what it
+depends on, and what it takes from outside the project.
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.04\textwidth}>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}@{}}
+\toprule
+& result type & depends on & external premise & standing \\
+\midrule
+1 & background and analysis & shared notation & published theorems on constructions and periodicity & cited or derived \\
+2 & catalogue-relative exclusion & catalogue generator & none; order 30 is unenumerated & computational, uncertified \\
+3 & census-complete exclusions & rung engine; Paper~4 & completeness of the order-28 and order-29 censuses & computational, uncertified \\
+4 & census verification & published representatives & completeness of the order-29 census & partly kernel-checked \\
+5 & inference rule and evaluation & none & none & proved rule; measured performance \\
+6 & conditional model & Paper~1; published counts & the model form & heuristic \\
+7 & theorem and bounds & none & none & proved; computational \\
+8 & independent confirmation & regional encoding, solvers, audit & none; the 1993 and 2009 counts are for comparison & computational, uncertified \\
+9 & cost measurement & Papers~1 and~8 & the reported cost of the 2011 enumeration & estimated, validated \\
+10 & obstruction search & Papers~2 and~9 & the complete catalogues of orders 12--15 & sampled, replicated \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+What remains open is the residual problem, stated more fully in the closing chapter: order-32 arrays that are not algebraic, not periodic,
+not geometrically symmetric, contain no Costas deletion minor of order 28 or 29, and are not
+augmentations of algebraic order-30 cores. No structural classification in this volume controls
+that class, and exhaustive enumeration of all order-32 permutations remains far out of reach.
+
+
+\chapter*{A note on software engineering}
+\addcontentsline{toc}{chapter}{A note on software engineering}
+
+The investigation was run as a software project as much as a mathematical one, and several terms
+from that practice recur in the papers. Two of them, \emph{rungs} and \emph{gates}, carry technical
+weight and are introduced here.
+
+\paragraph{Rungs.} Several searches are organised as a ladder of finite exhaustive searches indexed
+by a parameter. Each \emph{rung} is one complete run, with its own declared coverage and its own
+verdict. The main instance is the augmentation ladder of Papers~2 and~3. Rung $k$ searches every
+permutation of order $n$ obtained from a Costas core of order $n-k$ by inserting $k$ columns, $k$
+rows and $k$ dots. Rung~1 runs from order 30 to order 31; rungs 2, 3 and 4 target order 32 from
+cores of orders 30, 29 and 28. Rungs are run in
+increasing cost, and each is self-contained: a negative result at one rung is a theorem about that
+rung alone. Rungs need not imply one another; Paper~3 explains why neither of rungs 3 and 4 is known to imply the other.
+
+\paragraph{Gates.} A \emph{gate} is an acceptance criterion written down and frozen before the run
+it judges, in the manner of a pre-registered experiment or a release gate in continuous
+integration. Freezing it prevents the criterion from being tuned to the result. Paper~5 evaluates a
+propagation rule in two stages: Stage~1 on a benchmark of partial assignments, and Stage~2 inside an
+exact search. It uses two kinds of gate. A \emph{scientific gate} asks whether the rule deduces
+more than the baseline without ever rejecting a completable assignment. An \emph{operational gate}
+asks whether it makes search faster. A result can pass one and fail the other, and Paper~5's does. (Paper~8 uses ``Stage~1'' independently, for the first stage of its own campaign.)
+
+\paragraph{Related practice.} Other recurring terms are as follows.
+\begin{itemize}
+\item \emph{Fail-closed accounting.} A run counts as complete only when its declared coverage is known to cover the whole search space, by a proof such as Paper~8's partition and cover theorems or by construction, as with Paper~3's one work unit per dihedral orbit, and every unit of that coverage reports an explicit terminal status. Anything missing, failed or unparsed counts as not done.
+\item \emph{Census match.} Before a census-complete search runs, its catalogue is checked against
+the published census figures and its hash recorded.
+\item \emph{Work units and independent merging.} Large searches are split into deterministic units
+whose outputs are merged and checked by a separate tool.
+\item \emph{Independent re-scoring.} Every reported near-solution is re-scored by a separately
+written scorer.
+\item \emph{Release gate.} A repository self-test that must pass before any archive is released.
+\end{itemize}
+
+\input{shared_notation}
+
+\tableofcontents

@@ -1,0 +1,16 @@
+{
+ "order": 32,
+ "tasks": 21727,
+ "completed": 21727,
+ "missing": 0,
+ "failed": 0,
+ "total_nodes": 135486910196,
+ "total_arrays": 0,
+ "task_seconds_total": 62164.3,
+ "task_seconds_max": 107.59,
+ "task_file_sha256": "0c646d759d62a11f98224eafb732250dfeeb7ee3f68cf5d2b4ac7c59695e5a18",
+ "verdict": "COMPLETE: NO transpose-symmetric Costas array",
+ "problems": [],
+ "job": "181675851", "ncpus": 104, "service_units": 78.06, "walltime_used": "00:22:31",
+ "note": "transcribed from the job's summary.txt; the full results directory remains on the cluster; site paths redacted"
+}

@@ -1,0 +1,1 @@
+SELFTEST PASS: seed_Z=0 signed_vectors distinct pairs=49/56

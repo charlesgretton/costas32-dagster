@@ -1,0 +1,380 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,microtype,hyperref,url}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\title{Deletion-minor exclusions, heredity and telescoping-sum propagation\\
+for Costas arrays of order 32}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Orders 32 and 33 are the smallest for which the existence of a Costas array is
+unknown. We report four results that sharply delimit where an order-32 array
+could lie and introduce a new propagation rule for distinct-difference search.
+
+First, two census-complete exclusions: no order-32 Costas array contains an
+order-29 Costas array as a three-row, three-column deletion minor, nor an
+order-28 Costas array as a four-row, four-column deletion minor. The second
+quantifies over all $115{,}087{,}822{,}400$ core placements of the complete
+order-28 census. We show the two are logically independent.
+
+Second, a measurement over the complete order-28 census showing that the Costas
+property is almost never hereditary: $14.6\%$ of arrays contain an order-27
+Costas array, $3.4\%$ an order-26 one, and none an order-25 one. Of the 112
+order-27 sub-arrays found, 104 arise from corner deletion, which we explain: a
+corner deletion induces a translation on the survivors while any interior
+deletion induces a compression.
+
+Third, a coordinate classification of the complete order-28 census. Screening in
+exponential coordinates assigns every array a field and a degree using no
+provenance information, and reproduces the published per-construction breakdown
+$\{84,3,1,1\}$ exactly, class by class.
+
+Fourth, a telescoping-sum propagation rule for distinct-difference constraints.
+We prove it sound, formalise the proof in Lean~4 without Mathlib, and evaluate it
+under a prospectively frozen, cost-controlled protocol: on the complete order-12
+benchmark it detects $117{,}880$ of $296{,}656$ infeasible prefixes against
+$77{,}074$ for the baseline, at $1.050\times$ the measured propagation work and
+with no completable prefix rejected.
+
+All catalogues, programs, machine-checked proofs and raw run logs are released
+with checksums and a clean-room reproduction procedure.
+\end{abstract}
+
+\section{Introduction}
+
+A \emph{Costas array} of order $n$ is a permutation $h$ of $\{0,\dots,n-1\}$ such
+that the $\binom{n}{2}$ displacement vectors $(j-i,\,h_j-h_i)$ are pairwise
+distinct. They arise in sonar and radar waveform design and have been studied as
+combinatorial objects since Costas's 1965 report.
+
+Two algebraic families, due to Welch and to Golomb, produce arrays at orders
+determined by the prime powers nearby, and they remain the only generally
+applicable constructions known. Exhaustive enumeration has reached order 29, at
+a cost of $366.55$ CPU-years; orders 30 and 31 have never been enumerated,
+although arrays are known at both. Orders 32 and 33 are the smallest at which
+none is known.
+
+We do not settle the existence question. We delimit it. Section~\ref{sec:ladder}
+closes two extension channels completely; Section~\ref{sec:hered} measures how
+much of the problem those channels ever covered; Section~\ref{sec:coord}
+classifies the last completely enumerated census that is construction-explained;
+and Section~\ref{sec:tm} contributes a propagation rule that is not specific to
+Costas arrays and should apply to distinct-difference problems generally.
+
+\paragraph{Reproducibility.} Every computation is released with source,
+catalogues, raw logs and checksums, and every exhaustive claim is produced by a
+fail-closed pipeline that refuses a verdict on incomplete coverage
+(Section~\ref{sec:repro}).
+
+\section{Preliminaries}
+
+The dihedral group $D_4$ acts on the board; the Costas property is invariant, so
+arrays come in equivalence classes of size 8, or 4 when symmetric.
+
+Write $W_1(p,g,c)$ for the Welch array $h_i = g^{i+c} \bmod p - 1$ of order
+$p-1$, and $G_2(q,\alpha,\beta)$ for the Golomb array over $\F_q$ of order $q-2$
+with a dot at $(i,j)$ iff $\alpha^i+\beta^j=1$. Deleting corner dots from these
+gives the variants conventionally labelled $W_2,W_3,G_3,G_4,G_5$.
+
+\begin{definition}[Deletion minor]
+An order-$m$ array $K$ is a \emph{deletion minor} of an order-$n$ array $A$ if
+deleting $n-m$ columns of $A$, together with the rows they occupy, and
+compressing the remainder yields $K$.
+\end{definition}
+
+\begin{definition}[Augmentation rung]
+Fix $k$ and a Costas core $K$ of order $n-k$. Choose $k$ columns and $k$ rows of
+the $n\times n$ board, place the core dots at the surviving columns and rows in
+increasing order, and place $k$ further dots as a bijection between the chosen
+columns and rows. Rung $k$ is the exhaustive search over all such configurations.
+\end{definition}
+
+Rung $k$ enumerates exactly the order-$n$ permutations possessing a given
+order-$(n-k)$ Costas deletion minor, so an exhaustive rung with no solution is an
+exclusion theorem.
+
+\section{Catalogue generation and census verification}
+\label{sec:cat}
+
+The rung searches require catalogues of cores. We generate them rather than
+import them, which makes the input auditable.
+
+Seeding with $W_1(29)$, $W_1(31)$, $G_2(29)$, $G_2(31)$, $G_2(32)$ and closing
+under corner deletion \emph{and corner addition}, then under $D_4$, produces 712
+order-28 arrays in 89 dihedral orbits.
+
+\begin{proposition}\label{prop:cat28}
+The generated order-28 catalogue is the complete census.
+\end{proposition}
+\begin{proof}
+The published enumeration is exhaustive with 712 arrays. The generated catalogue
+contains 712 distinct permutations of $\{0,\dots,27\}$, each verified to have
+Costas defect 0, closed under $D_4$ with 89 orbits. Two sets of equal finite
+cardinality, one contained in the other, are equal.
+\end{proof}
+
+Corner \emph{addition} is essential and was initially omitted: $G_2(29)$ has
+order 27 and reaches 28 only upwards. A downward-only closure produces 704 arrays
+in 88 orbits, missing exactly one orbit, with representative
+\[
+(0,16,21,12,18,22,23,26,10,7,24,14,27,6,17,5,25,11,20,2,4,19,15,13,8,1,9,3).
+\]
+
+At order 29 the same closure produces 148 of the 164 census arrays. The
+shortfall is exactly the two $RW_0$ equivalence classes produced by the
+semi-empirical Rickard--Welch method, which appends a blank row, cyclically
+shifts, and adjoins a column --- not a corner operation, so no corner closure
+reaches it. We reconstruct the complete order-29 census from the 23 published
+equivalence-class representatives, validating each independently as a Costas
+permutation and reproducing every published figure: 164 arrays, 23 classes, 5
+symmetric, per-method counts $4/64/24/24/32/16$.
+
+\begin{proposition}[Order reachability]\label{prop:reach}
+Closing every $W_1(p)$ for prime $p\le43$ and every $G_2(q)$ for prime power
+$q\le43$ under corner deletion and addition reaches orders
+$\{26,\dots,30\}\cup\{34,35,36\}$ and no others in $[20,34]$. In particular
+$G_2(37)$ reaches 34 by one deletion and admits no second, so the families
+conventionally labelled $G_4$ and $G_5$ are empty at $q=37$, and no corner-surgery
+descendant of any such seed has order 31, 32 or 33.
+\end{proposition}
+
+\section{Two census-complete deletion-minor exclusions}
+\label{sec:ladder}
+
+All rungs use core-first pruning --- rejecting a placement as soon as the placed
+core carries a repeated displacement, which is exact for defect 0 --- with
+independent re-scoring of every low-defect configuration and a fail-closed
+coverage manifest.
+
+\begin{theorem}\label{thm:main}
+No order-32 Costas array contains an order-29 Costas array as a three-row,
+three-column deletion minor. No order-32 Costas array contains an order-28 Costas
+array as a four-row, four-column deletion minor.
+\end{theorem}
+
+\begin{center}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+rung & cores & measured placements & Costas found & minimum defect \\
+\midrule
+$k=3$ (order 29) & 164 arrays, 23 classes & $565{,}836{,}800$ & \textbf{0} & 4 \\
+$k=4$ (order 28) & 712 arrays, 89 classes & $115{,}087{,}822{,}400$ & \textbf{0} & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The $k=4$ run was executed as 89 deterministic work units, one dihedral orbit
+each; all report \texttt{EXHAUSTED}, and the fail-closed merge returns
+\texttt{EXHAUSTED\_AND\_VERIFIED}. Because order 28 has no sporadic arrays,
+``census-complete'' and ``all algebraic'' coincide there.
+
+For comparison, rung $k=2$ over the 664 generated order-30 cores is exhaustive
+relative to that catalogue --- order 30 has never been enumerated --- and yields
+no order-32 array, with minimum defect 2 attained in exactly one dihedral orbit.
+That orbit is the known near-solution, and rung $k=1$ identifies its parent: the
+unique order-31 Costas orbit reachable by one-point augmentation of the algebraic
+order-30 cores.
+
+\begin{remark}[Independence]
+Neither clause of Theorem~\ref{thm:main} implies the other. Deriving the $k=4$
+clause from the $k=3$ clause would require every order-29 Costas array to contain
+an order-28 Costas deletion minor, and conversely. Neither implication is
+established, and Theorem~\ref{thm:hered} shows the required deletion property is
+far from automatic. The two close different extension channels.
+\end{remark}
+
+\section{Heredity is corner-driven}
+\label{sec:hered}
+
+How much of the problem do such exclusions cover? With a complete census at order
+28 this is directly measurable.
+
+\begin{theorem}\label{thm:hered}
+Over the complete order-28 census, the fraction of arrays possessing a Costas
+deletion minor of order $28-k$ is $14.6\%$ for $k=1$, $3.4\%$ for $k=2$ and $0\%$
+for $k=3$. Of the 112 order-27 sub-arrays found, 104 arise from corner deletion
+and 8 are non-corner coincidences.
+\end{theorem}
+
+The explanation is immediate and is the reason the figure is so low: a corner
+deletion removes a dot at a boundary of both ranges, so the compression acting on
+the survivors is a translation, which preserves every displacement. Any interior
+deletion induces a genuine compression, which does not. The measured corner rate
+of $14.6\%$ is indistinguishable from the random-permutation rate $4/28=14.3\%$.
+
+This bounds the reach of the entire constructed-and-augmented approach, and
+correspondingly enlarges the residual class that no current structural theory
+controls.
+
+\section{Coordinate classification of the order-28 census}
+\label{sec:coord}
+
+The Welch relation $h_i = g^{i+c}-1$ is linear in the \emph{multiplicative}
+parameter $u_i=g^i$, not in the additive index. Interpolating against additive
+nodes therefore destroys exactly the structure it seeks: calibrated on known
+algebraic arrays it returns maximal degree and full support, indistinguishable
+from random permutations.
+
+In exponential coordinates the families separate. Put $u_i=g^i\in\F_q$ against
+$v_i=h_i$ (single-exponential, Welch), or $u_i=\alpha^{i+1}$ against
+$v_i=\beta^{h_i+1}$ (dual-exponential, Golomb, where $\alpha^i+\beta^j=1$ gives
+$v=1-u$). Offsets are free, since $u\mapsto\lambda u$ sends $a_j\mapsto
+a_j\lambda^{-j}$ and $v\mapsto\mu v$ scales the interpolant.
+
+\begin{theorem}\label{thm:coord}
+Every array in the complete order-28 census has degree 1 in single-exponential
+coordinates over $\F_{29}$, or in dual-exponential coordinates over $\F_{31}$ or
+$\F_{2^5}$, except for a single dihedral orbit of 8 arrays generic in both. That
+orbit is $G_2(29)$ of order 27 augmented by one corner dot.
+\end{theorem}
+
+\begin{center}
+\begin{tabular}{@{}lrrll@{}}
+\toprule
+class & arrays & orbits & coordinates & degree \\
+\midrule
+Welch direct & 672 & 84 & single, $\F_{29}$ & 1 \\
+Golomb, one deletion & 8 & 1 & dual, $\F_{31}$ & 1 \\
+Golomb, two deletions & 24 & 3 & dual, $\F_{2^5}$ & 1 \\
+augmented residue & 8 & 1 & generic in both & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The screen uses no provenance information, yet the published enumeration's
+breakdown into 84 $W_1$, 3 $G_4$, 1 $G_3$ and 1 $G_1$ classes gives the same
+multiset $\{84,3,1,1\}$ class by class. Extension-field arithmetic is not
+optional: $q-2=28$ needs $q=30$, not a prime power, so no intact Golomb array of
+order 28 exists and every Golomb-type array there is a deletion from $\F_{31}$ or
+$\F_{2^5}$.
+
+The governing asymmetry follows: corner deletion is a translation and preserves
+the degree-1 parameterisation, whereas adjoining a point off the curve forces the
+interpolant to full degree $N-1$, since $P-L$ vanishes at the other $N-1$ nodes.
+
+\section{Telescoping-sum propagation}
+\label{sec:tm}
+
+For a partial assignment and a lag $m$, the identity
+\[
+\sum_{i}\bigl(h_{i+m}-h_i\bigr)=\Bigl(\sum\text{last }m\Bigr)-\Bigl(\sum\text{first }m\Bigr)=:T_m
+\]
+holds for every sequence, and yields $T_m=T_{n-m}$ for free. It couples the
+lag-$m$ difference multiset to the endpoint sums, which no per-lag
+\textsc{AllDifferent} can see.
+
+\begin{lemma}[Soundness]\label{lem:sound}
+Let $k$ be the number of lag-$m$ pairs not wholly inside the prefix, $U$ the union
+of their difference domains, $\det$ the sum of the determined differences, and
+$R$ the remaining value set. Let $[\ell,h]$ bound $\det$ plus the sum of $k$
+distinct elements of $U$, and $[\tau_-,\tau_+]$ bound $T_m$ by extremal subset
+sums of $R$. If $[\ell,h]\cap[\tau_-,\tau_+]=\varnothing$ there is no Costas
+completion.
+\end{lemma}
+\begin{proof}
+For any completion $\sigma$ the identity above holds. Since $\sigma$ is Costas,
+its lag-$m$ differences are pairwise distinct, so the $k$ undetermined ones are
+$k$ distinct elements of $U$, whose sum lies between that of the $k$ smallest and
+the $k$ largest. The unknown parts of the endpoint sums are subset sums of $R$ of
+fixed size. Both constructions are outer approximations: they may admit sums no
+completion realises, but exclude none that a completion realises. The two sides
+being equal, the intervals meet.
+\end{proof}
+
+Lemma~\ref{lem:sound} and the surrounding development are formalised in Lean~4
+(18 modules, no Mathlib, no \texttt{sorry}, no \texttt{native\_decide}),
+including the extremal lemma that $k$ distinct elements of a finite integer set
+have sum between those of its $k$ smallest and $k$ largest, and soundness of the
+underlying domain filter.
+
+\paragraph{Evaluation.} The protocol was frozen before the run. The benchmark is
+the complete population of Costas-valid six-leading-column prefixes at order 12,
+labelled by exhaustive completion: 304{,}288 valid, 296{,}656 infeasible,
+7{,}632 completable, the split independently reproduced by a second completion
+procedure. The baseline is relation-algebra closure united with position--value
+domains under unary filtering, arc consistency, Hall matching and singleton
+shaving.
+
+\begin{theorem}\label{thm:tm}
+On this population the baseline detects $77{,}074$ infeasible prefixes. Adding
+the $T_m$ rule detects $117{,}880$, including $40{,}806$ additional, at $1.050$
+times the baseline measured propagation work. Neither rejects any of the
+$7{,}632$ completable prefixes.
+\end{theorem}
+
+The frozen gate required $\lceil 1.104167\times77{,}074\rceil = 85{,}103$
+detections, zero false positives and cost ratio at most 2; all three are met, the
+first by $32{,}777$. The result reproduces at five further complete populations
+at orders 10 to 12.
+
+\begin{remark}[Tree reduction is not speed-up]
+Under a separately frozen protocol, adding $T_m$ to an exact solver removes
+$26$--$32\%$ of the remaining search tree at orders 11 to 13 for about $4\%$
+additional deterministic work, with solution sets verified identical by exact
+byte comparison. It nevertheless runs $12$--$18\%$ slower in wall time, and both
+propagation configurations are $53$--$63\times$ slower than a bare incremental
+bitmask check that explores $5.5$--$8.1\times$ more nodes. The rule is a correct
+and powerful deduction whose current implementation does not pay for itself in
+seconds; the bottleneck is singleton shaving, not $T_m$.
+\end{remark}
+
+\section{Reproducibility}
+\label{sec:repro}
+
+Exhaustive negative results are only as good as the discipline that produced
+them. Four conventions were adopted after failures in this work.
+
+\emph{Assert the invariant before computing on the object.} Every tool validates
+its input as a Costas permutation and halts otherwise.
+
+\emph{Test the positive arm.} Detection power is measured on infeasible inputs;
+soundness can only be measured on feasible ones. Two propagator defects arose
+here --- a singleton-shaving routine that silently reinitialised its domains, and
+a relation filter that emptied every relation --- and the second was invisible to
+detection counts and immediate under a completable-arm test. Both were
+deterministic and internally consistent, and both would have passed a certificate
+of their own output.
+
+\emph{Compute the null analytically when sampling cannot resolve it.} Three
+analyses in this work drew conclusions from samples far below the resolution of
+the quantity estimated.
+
+\emph{Fail closed on coverage.} The merge tool refuses an exhaustive verdict
+unless every unit reports exhaustion, all agree on parameters and catalogue hash,
+coverage is exact with no gap or duplicate, and every reported configuration
+re-scores from scratch.
+
+\section{Conclusion}
+
+Order 32 remains open. What has changed is the size of the space in which an
+array could lie: two deletion-minor channels are closed over complete censuses, a
+third is closed relative to the generated order-30 catalogue, no corner-surgery
+descendant of any Welch or Golomb seed has order 31, 32 or 33, and the order-28
+census is completely explained by coordinate system. Against this,
+Theorem~\ref{thm:hered} shows that deletion minors were never a large fraction of
+the problem, so the residual class is correspondingly larger than the closures
+suggest --- and no current structural theory controls it.
+
+The telescoping-sum rule is the component we expect to outlast the specific
+question. It is sound, machine-checked, and couples information across
+distance classes, which is where additional power must come from once per-class
+filtering saturates.
+
+\end{document}

@@ -1,0 +1,44 @@
+#!/bin/bash
+# Dagster scaling test: native split with WORKERS MATCHED TO MESSAGES, ~34 cores per
+# region, 3 regions at a time on one node.  The earlier sweep gave each region 1-2
+# workers, which made it a sequential TiniSAT run and told us nothing about scaling.
+# Regions: the 9 hardest f=4 regions Kissat solved in Stage 1 (direct baseline) + 3 it did not.
+#   qsub -v STAGE1=$COSTAS_DATA/results/stage1_<id> hpc/dagster_scale.pbs
+# Worst case (every run to the 600 s cap): 4 settings x 4 waves x 600 s = 2.7 h, ~560 SU.
+#
+# Full node per region, depth 2 only (projected ~9 s vs ~20 s at depth 1 for a 106 s region):
+#   qsub -v STAGE1=...,SLOT=104,NSOLVED=4,NCENS=2,GRID='tini_d2|2|-m 0 -e 0 -b 0 -g 1' hpc/dagster_scale.pbs
+# Worst case: 6 regions x 600 s = 1 h, ~210 SU.
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=104,mem=480GB,walltime=03:00:00,jobfs=8GB
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas-scale
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-.}"; source hpc/env.sh
+# STAGE1 selects regions and supplies the Kissat baseline. IDS (a file of region ids) and
+# BASELINE (a Kissat ledger, e.g. the 4 h tail runs combined) override those two roles.
+[ -n "${STAGE1:-}" ] || { [ -n "${IDS:-}" ] && [ -n "${BASELINE:-}" ]; } || { echo "set STAGE1, or both IDS and BASELINE"; exit 1; }
+BASELINE=${BASELINE:-$STAGE1/ledger.jsonl}
+OUT="$COSTAS_DATA/results/scale_${PBS_JOBID:-local}"; mkdir -p "$OUT"
+if [ -n "${IDS:-}" ]; then cp "$IDS" "$OUT/regions.txt"
+else python3 hpc/select_scale.py "$STAGE1/ledger.jsonl" "${NSOLVED:-9}" "${NCENS:-3}" ${FCENS:-} > "$OUT/regions.txt"; fi
+echo "regions: $(wc -l < "$OUT/regions.txt")"
+# Cores per region. Default 34 (3 regions per node). SLOT=104 gives one region per node,
+# up to 103 workers -- the setting where a depth-2 split is projected to pay off.
+SLOT=${SLOT:-34}; TOT=$(( (104 / SLOT) * SLOT ))
+echo "cores per region: $SLOT, regions at a time: $(( 104 / SLOT ))"
+# label|depth|flags.  Workers are sized per region to the message count (max 33 per slot).
+GRID=${GRID:-"tini_d1|1|-m 0 -e 0 -b 0 -g 1
+tini_d2|2|-m 0 -e 0 -b 0 -g 1
+mini_q1_d2|2|-m 4 -q 1 -e 0 -b 0 -g 1
+strg_d1|1|-m 3 -e 0 -b 0 -g 1"}
+GRID=${GRID//;/$'\n'}      # allow ';' between settings, since qsub -v cannot pass newlines
+while IFS='|' read -r label depth flags; do
+  [ -n "$label" ] || continue
+  echo "== $label : depth $depth : $flags"
+  NATIVE_DEPTH=$depth DAGSTER_FLAGS="$flags" \
+    bash hpc/run_shards.sh "$OUT/regions.txt" "$OUT/$label" "${CAP:-600}" D "$SLOT" "$TOT"
+done <<< "$GRID"
+python3 hpc/scale_report.py "$BASELINE" "$OUT"/*/ | tee "$OUT/report.txt"

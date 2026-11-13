@@ -1,0 +1,84 @@
+\section{Dyadic residue caps do not characterise the Costas property}
+\label{p7-sec:caps}
+
+The filtration above counts defect conditions modulo powers of two. A natural extension works with the
+displacement vectors themselves: count the pairs of dots whose displacement falls in each residue class
+modulo $2^r$, and use the fact that a Costas array has every integer displacement at most once. This
+section shows that at order 32 no argument of that kind can exclude Costas arrays.
+
+For a permutation $h$ of order 32 and pairs $i<j$, write $(d,e)=(j-i,\,h_j-h_i)$, so that $1\le d\le31$
+and $1\le|e|\le31$. For $r\in\{1,\dots,5\}$, let $c_r(a,b)$ be the number of pairs whose displacement is
+congruent to $(a,b)$ modulo $2^r$, and let $C_r(a,b)$ be the number of admissible integer vectors in
+that class. A Costas array satisfies $c_r(a,b)\le C_r(a,b)$ for every $r$ and every class.
+
+\begin{proposition}[Dyadic residue caps do not characterise Costas uniqueness]
+\label{p7-prop:caps}
+There is an order-32 permutation $h^\ast$ with $c_r(a,b)\le C_r(a,b)$ for every $r\in\{1,\dots,5\}$ and
+every class $(a,b)$, whose defect is 55.
+\end{proposition}
+\begin{proof}
+The witness is
+\[
+\begin{aligned}
+h^\ast=(&5,19,25,28,29,8,0,26,14,3,31,1,23,30,2,20,\\
+        &16,13,18,9,15,10,22,27,12,21,7,4,6,17,11,24).
+\end{aligned}
+\]
+Checking it is a finite computation from the definitions: $h^\ast$ is a permutation, it satisfies every
+cap at every level (at $r=5$ the fullest class is exactly at capacity), and its repeated displacements,
+55 in excess, are spread over 20 of the 31 lags. The witness was found by local search, but the proof
+does not depend on the search, only on the check, which the released script
+\texttt{verify\_dyadic\_caps.py} performs.
+\end{proof}
+
+\begin{corollary}
+\label{p7-cor:caps}
+Let $E$ be any statistic determined by the occupancies $c_r$. No contradiction of the form
+$L\le E(h)\le U$ with $L>U$ can be obtained when $L$ holds for every order-32 permutation and $U$ is
+derived from the caps alone.
+\end{corollary}
+\begin{proof}
+$h^\ast$ is a permutation satisfying every cap, so $L\le E(h^\ast)\le U$.
+\end{proof}
+
+The corollary covers the dyadic collision energies of the relative trajectories
+$r_{ij}(t)=d+te$, the cyclic autocorrelation, the power spectrum $|\hat A|^2$, which is the Fourier
+transform of the occupancies, and multiresolution summaries computed in perfect-shuffle or bit-reversed
+order. It does not cover arguments that record which pair occupies which class. But at modulus 32 that
+labelled data determines the permutation up to a cyclic shift of its values, so such an argument is the
+original problem in other coordinates.
+
+\paragraph{M10 and its radix-2 analogues.} M10 is the address permutation used to organise a radix-7
+fast Fourier transform on the spiral honeycomb image algebra~\cite{p7-sheridan2005}: a radix-7 perfect
+shuffle of hexagonal-lattice addresses, which gives geometric meaning to Cooley--Tukey regrouping but
+supplies no invariant of the image. Its square-grid analogues, the rotation of an index's binary digits
+and bit reversal, were applied to the eight dihedral images of the defect-2 near-solution $N_{32}$ in
+three ways (Table~\ref{p7-tab:shuffle}). None produced a Costas array. Rotating the whole 10-bit pixel
+address keeps one dot per row and column only when it reduces to the transpose, a symmetry of the
+square. Acting on the columns alone retains the most structure, but never brings the defect below 11.
+Bit reversal gives defects of 67--74, close to the best of random permutations, whose median defect is
+90.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+action & images & permutations & defect & Costas \\
+\midrule
+rows and columns, rotation & 32 & 32 & 30--44 & 0 \\
+columns only, rotation & 32 & 32 & 11--32 & 0 \\
+whole 10-bit address, rotation & 72 & 8 & 2 & 0 \\
+rows and columns, bit reversal & 8 & 8 & 74 & 0 \\
+columns only, bit reversal & 8 & 8 & 67--68 & 0 \\
+whole 10-bit address, bit reversal & 8 & 8 & 74 & 0 \\
+\bottomrule
+\end{tabular}
+\caption{Radix-2 shuffles applied to the eight dihedral images of $N_{32}$. The eight permutations from
+rotating the whole address are $N_{32}$'s own dihedral images.}
+\label{p7-tab:shuffle}
+\end{table}
+
+\noindent Together with Proposition~\ref{p7-prop:caps}, this closes M10, and unlabelled dyadic Fourier
+summaries generally, as candidate order-32 obstructions.
+

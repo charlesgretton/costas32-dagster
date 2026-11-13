@@ -1,0 +1,59 @@
+#!/bin/bash
+# Order-32 cost probes on one full 104-core node: node rate (alone and under full load), clock behaviour,
+# estimator agreement, estimator validation in genuine order-32 subtrees, and the prefix-work profile
+# that determines latency.   Submit from the repository root:   qsub estimate/cluster/probe.pbs
+# Expected cost: under about 1 hour on 104 cores, i.e. at most about 0.25 KSU.
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=104,mem=480GB,walltime=01:15:00,jobfs=16GB
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas-probe
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-.}"
+# Environment: the campaign's env.sh sets COSTAS_DATA and loads a modern Python; fall back to the same defaults.
+set +u; ENV=symmetric/sym32_sat/hpc/env.sh; [ -f "$ENV" ] && source "$ENV"; set -u
+if command -v module >/dev/null 2>&1; then module load python3/3.11.0 2>/dev/null || true; fi
+export COSTAS_DATA=${COSTAS_DATA:-$HOME/costas32_data}
+# Sizes (override with qsub -v NAME=value, or env vars when rehearsing locally)
+NW=${NW:-104}                     # workers (cores)
+RATE_SECS=${RATE_SECS:-120}       # node-rate measurement length
+KNUTH_PROBES=${KNUTH_PROBES:-2000000}; KNUTH_SEEDS=${KNUTH_SEEDS:-8}
+DEEP8_WORKERS=${DEEP8_WORKERS:-96}; DEEP8_K=${DEEP8_K:-1}; DEEP8_CAP=${DEEP8_CAP:-1800}
+DEEP9_K=${DEEP9_K:-12}; DEEP9_CAP=${DEEP9_CAP:-150}; DEEP_PROBES=${DEEP_PROBES:-5000}
+PREFIX_DEPTH=${PREFIX_DEPTH:-4}; PREFIX_PROBES=${PREFIX_PROBES:-20}
+OUT="${COSTAS_DATA:-$PWD}/estimate_results/probe_${PBS_JOBID:-local}"; mkdir -p "$OUT"
+log(){ echo "[$(date +%T)] $*" | tee -a "$OUT/progress.log"; }
+log "results directory: $OUT  (python: $(python3 --version 2>&1))"
+pin(){ if command -v taskset >/dev/null && [ "$NW" -gt 1 ]; then taskset -c "$1" "${@:2}"; else "${@:2}"; fi; }
+mhz(){ awk -F: '/cpu MHz/{s+=$2;n++; if($2>mx)mx=$2; if(mn==""||$2<mn)mn=$2} END{printf "mean %.0f min %.0f max %.0f\n",s/n,mn,mx}' /proc/cpuinfo; }
+
+log "environment"
+{ lscpu; echo; gcc --version | head -1; echo; echo "idle MHz: $(mhz)";
+  for f in /sys/devices/system/cpu/intel_pstate/no_turbo /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor; do
+    [ -r "$f" ] && echo "$f: $(cat "$f")"; done; } > "$OUT/environment.txt" 2>&1 || true
+gcc -O3 -march=native -o "$OUT/costas_tree" estimate/costas_tree.c -lm
+T="$OUT/costas_tree"; sha256sum estimate/costas_tree.c "$T" > "$OUT/sha256.txt"
+
+log "single-core rate"
+pin 0 "$T" rate 32 "$RATE_SECS" > "$OUT/rate_single.txt"
+
+log "full-node rate on $NW cores"
+for i in $(seq 0 $((NW-1))); do pin "$i" "$T" rate 32 "$RATE_SECS" > "$OUT/rate_full_$i.txt" & done
+sleep $((RATE_SECS/2)); echo "loaded MHz: $(mhz)" >> "$OUT/environment.txt"; wait
+
+log "Knuth estimates, $KNUTH_SEEDS seeds"
+for s in $(seq 1 "$KNUTH_SEEDS"); do pin $((s-1)) "$T" knuth 32 "$KNUTH_PROBES" $((100+s)) > "$OUT/knuth_$s.txt" & done; wait
+
+log "estimator validation in order-32 subtrees: depth 8 on $DEEP8_WORKERS cores, depth 9 on the rest"
+for i in $(seq 0 $((DEEP8_WORKERS-1))); do pin "$i" "$T" deepval 32 8 "$DEEP8_K" "$DEEP8_CAP" $((1000+i)) "$DEEP_PROBES" > "$OUT/deep8_$i.txt" & done
+for i in $(seq "$DEEP8_WORKERS" $((NW-1))); do pin "$i" "$T" deepval 32 9 "$DEEP9_K" "$DEEP9_CAP" $((2000+i)) "$DEEP_PROBES" > "$OUT/deep9_$i.txt" & done
+wait
+
+log "prefix-work profile at depth $PREFIX_DEPTH"
+pin 0 "$T" prefixes 32 "$PREFIX_DEPTH" "$PREFIX_PROBES" 7 > "$OUT/prefixes_d${PREFIX_DEPTH}.txt"
+
+log "summary"
+python3 estimate/cluster/summarise.py "$OUT" > "$OUT/summary.txt" 2>&1 || log "summary FAILED (raw results are intact); rerun: python3 estimate/cluster/summarise.py $OUT"
+cat "$OUT/summary.txt"
+log "done: $OUT"

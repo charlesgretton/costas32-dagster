@@ -1,0 +1,313 @@
+\section{The question}
+\label{sec:question}
+An exhaustive search at order 32 spends almost all its effort in prefixes that pass every local test yet have
+no completion. At mid-depth this is nearly universal: of the prefixes that survive the native checks and
+forward checking, 90--100\% are dead (Section~\ref{sec:local}). The question of this paper is whether those
+deaths have \emph{reasons shorter than the search that discovers them}: rules, certificates or relaxations
+that refute a dead prefix with far less work than exhausting its subtree, and that recur across positions
+and orders. Each candidate was tested against a gate fixed in advance, against negative controls, and,
+for the strongest results, by an independent implementation.
+
+\section{Method}
+\label{sec:method}
+\paragraph{Ground truth.} At orders 12 to 15 every Costas array is listed by the project's exact search, so a
+prefix is completable exactly when some array contains it. At larger orders completability is decided by
+a SAT solver and, for subtree sizes, by the native search; no relaxation is ever used as ground truth.
+
+\paragraph{Prefixes.} A prefix fills columns from the left. It is \emph{locally admissible} if its rows are
+distinct, no displacement repeats, and every unplaced column still has a legal row (forward checking).
+
+\paragraph{Sampling.} Prefixes are drawn by random walks through the locally admissible tree. A walk reaches
+a prefix with probability $\prod_i 1/b_i$, where $b_i$ is the number of legal choices at step $i$, so weighting
+by $\prod_i b_i$ gives estimates for the uniform depth layer; weighting dead prefixes by their native subtree
+size gives estimates of the share of \emph{work} affected. Weighted estimates are reported with their
+effective sample sizes $N_{\mathrm{eff}}=(\sum w)^2/\sum w^2$.
+
+\section{Local obstructions}
+\label{sec:local}
+\paragraph{Minimal obstructions.} For dead order-12 prefixes at depth 5, deleting dots one at a time while the
+set stays infeasible gives minimal infeasible dot sets: sets of dots with no repeated displacement that lie
+in no Costas array. They are tiny, almost always four dots, but scattered: 60 obstructions came in 56
+shapes, and none of twelve shapes tested is infeasible at every position at order 12 or 13.
+
+\paragraph{Negative control.} The same pipeline was run against 7{,}852 random permutations, the number of
+order-12 Costas arrays, on the same prefixes:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+depth 5 & dead & 3-dot obstructions & 4-dot & recurring shapes \\
+\midrule
+Costas arrays & $86\%$ & 19 & 319 & $29\%$ \\
+random permutations & $91\%$ & 6 & 352 & $22\%$ \\
+\bottomrule
+\end{tabular}
+\caption{Minimal obstructions against the Costas arrays and against an equally sparse random set, on the same
+400 sampled prefixes.}
+\label{tab:control}
+\end{table}
+
+\noindent The bulk of the obstruction statistics is reproduced by sparsity alone. The Costas-specific residue
+is small: more three-dot obstructions, and somewhat more recurrence.
+
+\paragraph{The residue is positional.} Exhaustively at order 12, 3{,}508 of the 288{,}600 three-dot sets with no
+repeated displacement lie in no Costas array: $1.2\%$, against about $0.27\%$ expected for a random set of the
+same size. The excess concentrates at corners: $0.84\%$ of triples with no corner dot are infeasible, $4.9\%$
+with one, and $62\%$ with two. No three-dot shape is infeasible at every position at both orders 12 and 13.
+
+\paragraph{A positive control: corner reduction.} Deleting a corner dot translates the other dots, so order-$n$
+arrays with a dot at $(0,0)$ correspond exactly to order-$(n-1)$ arrays that admit a corner addition. This
+predicts the feasibility of every corner triple at order $n$ from the catalogue at order $n-1$:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+order & arrays with a dot at $(0,0)$ & admissible arrays, order $n-1$ & triples predicted correctly \\
+\midrule
+13 & 509 & 509 & 8{,}676 of 8{,}676 \\
+14 & 734 & 734 & 12{,}132 of 12{,}132 \\
+15 & 616 & 616 & 16{,}513 of 16{,}513 \\
+\bottomrule
+\end{tabular}
+\caption{Corner reduction as a lifted obstruction: exact at three orders, with no refitting.}
+\label{tab:corner}
+\end{table}
+
+\noindent Plain infeasibility one order lower explains none of the 1{,}599 infeasible corner triples; the whole
+effect is the small size of the corner-admissible subclass. The apparatus recovers real cross-order
+structure, and the structure it recovers is the corner surgery of Paper~2.
+
+\section{Clause learning, matching and cutting planes}
+\label{sec:proofs}
+\paragraph{Incremental clause learning.} Solving 36 order-16 sibling cubes with one persistent CDCL solver
+per family, instead of a fresh solver per cube, saved $8$--$18\%$ of conflicts; related siblings benefited
+slightly more than unrelated cubes.
+
+\paragraph{The native/SAT frontier.} For dead prefixes that survive all local checks, the native search's
+subtree size was compared with the conflicts a fresh CDCL solver needs to refute the prefix. At order 14 the
+median ratio was $1.4$--$1.6$ native nodes per conflict, at order 16 $1.16$, and no prefix showed even a
+five-fold advantage: CDCL finds no shorter reasons than the search.
+
+\paragraph{Hall's condition.} A matching test of unplaced columns against unused rows catches $0$--$2\%$ of dead
+prefixes at mid-depth, rising to $62\%$ only at depth 9 of 12, where little work remains.
+
+\paragraph{Cutting planes.} Dead prefixes below the LP transition of Section~\ref{sec:lp} were refuted by Exact,
+a cutting-planes pseudo-Boolean solver descended from RoundingSat~\cite{elffers2018}, on the native
+integer model of that section. Every prefix was refuted and every live control satisfied, but the effort
+tracked the native subtree: medians of $1.3$, $1.2$ and $0.9$ native nodes per conflict at orders 12, 13 and
+14, falling as subtrees grow. The build used had no LP integration, and its proofs were not logged.
+
+\section{The pair-marginal relaxation}
+\label{sec:lp}
+\paragraph{Formulation.} Placement variables $x_{i,r}\in[0,1]$ satisfy the row and column equalities. For each
+pair of columns $i<j$, variables $y_{ijrs}\in[0,1]$ over distinct rows carry one unit of mass, with marginals
+$\sum_s y_{ijrs}=x_{i,r}$ and $\sum_r y_{ijrs}=x_{j,s}$: the first level of the Sherali--Adams
+hierarchy~\cite{sherali1990}. Each displacement class $(d,e)$ has capacity $\sum y\le1$ over the pairs at
+lag $d$ and rows differing by $e$. A prefix fixes its placements to 1. Every constraint holds for every
+Costas array, so the relaxation is sound at every order. A weaker form replaces the marginals by the
+McCormick inequalities $y\le x_{i,r}$, $y\le x_{j,s}$, $y\ge x_{i,r}+x_{j,s}-1$.
+
+\paragraph{Soundness, checked.} No prefix of a real Costas array was cut (60 of 60, at depths 3 to 10 of order
+12), nor any of 483 completable prefixes in the confirmation below.
+
+\paragraph{A sharp transition.} Across orders 12 to 16, with 60 to 160 dead prefixes per cell:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}rrrrrr@{}}
+\toprule
+order & depth & $k/n$ & weak form & strong form & strong, uniform layer \\
+\midrule
+12 & 6 & $0.500$ & $5\%$ & $28\%$ & $25\%$ \\
+12 & 7 & $0.583$ & $53\%$ & $100\%$ & $100\%$ \\
+13 & 7 & $0.538$ & $14\%$ & $74\%$ & $72\%$ \\
+13 & 8 & $0.615$ & $75\%$ & $100\%$ & $100\%$ \\
+14 & 8 & $0.571$ & $41\%$ & $98\%$ & $99\%$ \\
+15 & 8 & $0.533$ & $8\%$ & $63\%$ & $68\%$ \\
+15 & 9 & $0.600$ & $57\%$ & $100\%$ & $100\%$ \\
+16 & 9 & $0.562$ & $30\%$ & $93\%$ & $94\%$ \\
+16 & 10 & $0.625$ & $83\%$ & $100\%$ & $100\%$ \\
+\bottomrule
+\end{tabular}
+\caption{Share of dead prefixes the relaxation proves infeasible, near the transition. Work-weighted rates
+agree beyond the transition and are slightly lower inside it.}
+\label{tab:transition}
+\end{table}
+
+\noindent Logistic fits put the 90\% point $\alpha_{90}$ between $0.512$ and $0.557$ of the order at all five
+orders, and a fixed-fraction model fits far better than a fixed number of remaining columns (negative
+log-likelihood 314 against 606). Beyond the transition no miss occurred among 1{,}140 sampled dead
+prefixes, an approximate 95\% upper bound of $0.26\%$ on the miss rate, with the weighted estimates agreeing
+at effective sample sizes of 32 to 146 per cell. An independent implementation, with its own enumerator,
+generator and sampler, reproduced the transition and the weak--strong contrast at orders 12 to 14.
+
+\paragraph{The certificates are global.} Shrinking the displacement capacities to a minimal set of lags that
+still refutes each prefix leaves 3 to 5 lags, but the sets vary: 17 distinct among 20 prefixes at order 12.
+A per-lag matching test, Hall's condition on column pairs and differences, explains only 5 of 25 and 1 of 16
+of the certified prefixes. The refutations couple several lags through shared columns.
+
+\section{Order-32 geometry}
+\label{sec:geometry}
+The validated estimator of Paper~9, applied per depth to the order-32 tree with all eight symmetries,
+locates the transition at depths 17--18 and the tree's widest level at depth 20. Calibrated against exact
+counts at orders 12 to 14, the per-depth estimates were within $0.3\%$.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+cut depth & locally admissible prefixes & share of the tree at or above it & best possible saving \\
+\midrule
+16 & $1.91\times10^{18}$ & $3.6\%$ & $28\times$ \\
+17 & $5.00\times10^{18}$ & $11.4\%$ & $8.7\times$ \\
+18 & $8.20\times10^{18}$ & $27.9\%$ & $3.6\times$ \\
+19 & $7.41\times10^{18}$ & $52.0\%$ & $1.9\times$ \\
+\bottomrule
+\end{tabular}
+\caption{The order-32 frontier, and the most any rule complete at a given depth could save if it cost
+nothing.}
+\label{tab:frontier}
+\end{table}
+
+\noindent Solving the relaxation once per frontier prefix is out of the question. More fundamentally, even a
+free, perfect replica of its verdict at depth 17 saves at most a factor of about nine. The depth of the transition was measured at orders 12 to 16, near the
+peak of the Costas counts; that it stays near the same fraction of the order as the counts fall, which
+they do exponentially fast in proportion to all permutations~\cite{warnke2023density}, was checked at orders
+18 and 20, beyond the peak, for binary displacement consistency (Section~\ref{sec:late}): there too it
+refutes almost nothing at half depth and about three quarters of prefixes at $0.55n$. That the fraction
+stays put through the far sparser orders 24 to 32 remains an assumption.
+
+\section{Triple consistency}
+\label{sec:triple}
+The next level of the hierarchy adds, for every triple of columns, a distribution over distinct row triples
+whose three projections equal the three pair distributions. An independent order-12 implementation, on
+exactly equivalent prefix-reduced models, found it strictly stronger: it certified all 12 dead prefixes
+sampled at depth 6, where the pair relaxation certifies about half. At depth 5 ($0.42n$) it certified 2 of 22,
+far below the predeclared gate of 90\%. At depth 4 no instance was certified within the time limit. No live
+control was cut. The transition moves by about one column, from near $0.58n$ to near $0.50n$ at order 12; at
+order 32 that corresponds to depth 16, where the ceiling of Table~\ref{tab:frontier} is $28\times$, for a
+relaxation that could not be run at that order.
+
+\section{Late mechanisms}
+\label{sec:late}
+Three further mechanisms that work on exact displacement occupancy were measured, one by the project's
+search and two by an independent implementation within the project, whose code and data are kept in
+\texttt{mining/independent/}.
+
+\paragraph{Binary displacement consistency.} At every node, each pair of unplaced columns must admit a pair
+of rows that repeats no used displacement, either between the two new dots or against the placed dots,
+and rows without such a partner are removed until nothing changes. On complete searches it is sound (every
+order returns exactly the known arrays) and strong:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+order & no lookahead & forward checking & binary consistency & reduction \\
+\midrule
+10 & 152{,}100 & 73{,}778 & 19{,}715 & $7.7\times$ \\
+12 & 3{,}488{,}680 & 1{,}583{,}032 & 284{,}922 & $12.2\times$ \\
+13 & 18{,}290{,}043 & 8{,}116{,}650 & 1{,}362{,}891 & $13.4\times$ \\
+14 & 83{,}176{,}084 & 36{,}110{,}650 & 5{,}314{,}892 & $15.6\times$ \\
+15 & 435{,}090{,}280 & 185{,}553{,}661 & 26{,}624{,}065 & $16.3\times$ \\
+\bottomrule
+\end{tabular}
+\caption{Nodes of the left-to-right search with three levels of lookahead.}
+\label{tab:binac}
+\end{table}
+
+\noindent The reduction grows with the order, but more slowly at each step, which is consistent with a large
+constant factor rather than a lower growth rate. Where it acts settles the question: at orders 13 and 14,
+93\% and 97\% of its cuts fall between $0.54n$ and $0.64n$, almost none before $0.5n$, and the smallest
+remaining domain at a cut is typically one or two rows. Binary consistency is therefore strong in the
+same band as the pair-marginal relaxation, where the tree is widest, and not earlier. Recomputed from
+scratch at every node, as here, it is about eight times slower than the plain search at order 15.
+
+Whether it can pay for itself was then tested against a stronger baseline, the search with forward
+checking, using one engine and three policies whose solution sets were checked to be identical. Against
+forward checking, binary consistency saves only about four times the nodes at order 14, and each call
+costs about forty forward-checking nodes. Triggering it only where it acts, from about $0.6n$ or when a
+domain is down to one row, still left the search 1.3 to 1.5 times slower at orders 13 and 14. More
+decisively, the time spent outside the consistency checks bounds what any implementation could achieve:
+even checks that cost nothing would make the search at most 2.0 times faster at order 13 and 1.6 times at
+order 14. That ceiling falls with the order. The tested implementation therefore fails a predeclared
+production gate of a 1.25-fold speed-up, and an incremental one would have to be about four times cheaper
+merely to reach that gate at order 14, against a shrinking margin; binary consistency was not retained in
+the production solver. The comparison used only the vertical-flip symmetry, identically for all three
+policies, and was run at orders 12 to 14. The two left-to-right policies did not commit forced columns out
+of order, whereas the policy with dynamic column choice does so implicitly by always choosing the column
+with fewest rows; that asymmetry favours dynamic choice, which nevertheless did not improve elapsed time.
+Binary consistency thus remains informative about where pruning power lies, but not, on this evidence, a
+route to a faster search.
+
+The same transition holds beyond the peak of the Costas counts. The independent implementation applied
+binary consistency to 24 random prefixes per depth at orders 18 and 20, which have 15{,}096 and 6{,}464
+arrays. At half depth it refuted 1 prefix of 24 at each order; at depth 10 of 18 it refuted 18 of 24, and at
+depth 11 of 20 it refuted 16 of the 21 that forward checking had not already closed. In both cases the
+smallest remaining domain at that depth was typically two rows. Among prefixes that survive binary
+consistency near half depth, the pair-marginal relaxation still proved some infeasible (2 of 7 at order 18
+depth 9, 1 of 8 at order 20 depth 10), so on some prefixes it is strictly the stronger of the two.
+
+\paragraph{Chain-filtered Hall analysis.} The independent implementation kept, for every pair of columns,
+only the row pairs supported through every intermediate column, and then tested Hall's condition on each
+lag's positions and available differences. Hall deficiencies appear in none of 20 dead prefixes at order 14
+depth 6, in 4 at depth 7 and in 19 at depth 8 ($0.57n$); at order 13 depth 7 they appear in 10 of 20,
+where the pair-marginal relaxation certifies about three quarters. Splitting on sets with one unit of slack
+increased total work for every one of the 49 prefixes tested.
+
+\paragraph{Where completion is decided.} The same implementation counted, at orders 12 to 14, which locally
+valid prefixes extend to a Costas array. At depth 3, 96--98\% do; at the midpoint depth $\lceil0.53n\rceil$,
+0.8\%, 0.5\% and 0.09\% do. No sound rule can prune much at depth 3 of these orders. The work between the two
+depths is nearly uniform across depth-3 prefixes (Gini coefficient about 0.09), and only 30--38\% of it lies
+above the midpoint level, as a branching factor near four implies, so compiling that stretch of the search
+could save at most a factor of about 1.3. These orders sit near the peak of the Costas counts, which caps
+what can be learned from them about early pruning at order 32.
+
+\section{Aggregate relaxations}
+\label{sec:aggregate}
+At lag $d$ the Costas condition asks for $n-d$ distinct values in a range of $2n-2$: injectivity at density
+at most one half. Relaxations that keep only aggregates of the differences, such as sums, sums of squares
+or residues, lose which values are occupied, which is where the constraint bites. A direct test: for each
+lag, the sum of squares of the differences must lie between the least and greatest values achievable by
+$n-d$ distinct allowed differences with the same sum. At order 32, $95.9\%$ of 20{,}000 random permutations,
+none of them Costas, satisfy all 31 of these conditions, as do $N_{32}$ and the witness of Paper~7; at
+order 12 the share is $62.3\%$, so the conditions weaken as the order grows. Correll and Swanson make the
+corresponding observation for a single statistic: the number of positive first differences, which they
+show lies within 2.5 of $(n-1)/2$ for every known Costas array, by itself yields only an $O(n^{-1/2})$
+density~\cite{correll2023difference}, against the exponential decay of the true
+density~\cite{warnke2023density}.
+
+Classifying midpoint states by short-lag signatures falls to the same effect. With a signature recording,
+for lags 1 to 4, how many differences are positive and how many are small, signature classes with at least
+100 members and no completable state cover $9.35\%$ of the 987{,}664 locally valid order-12 midpoint states,
+as the independent implementation found and a recomputation here reproduces exactly. With the completable
+labels shuffled at random, such classes cover $8.3$--$9.0\%$: almost all of the apparent exclusion is what
+sparsity alone produces.
+
+\section{Implications}
+\label{sec:implications}
+Three things should be distinguished.
+\begin{itemize}
+\item \emph{An obstruction language was found.} The pair-marginal relaxation proves dead prefixes infeasible
+with linear certificates that no local rule and no resolution-based solver produces, and it does so
+completely, in sample, beyond about half depth. That is new, and it is the first strong global obstruction
+system for partial Costas permutations that we know of.
+\item \emph{A cheap propagator was not.} Every reasoning tested below the transition, whether local
+rules, clause learning, cutting planes or triple consistency, either fails to refute early or needs effort
+comparable to the native search. The mechanisms that work on exact occupancy, namely the pair-marginal
+relaxation, binary displacement consistency and chain-filtered Hall analysis, all become strong in the
+same band near half depth, and aggregate statistics carry little beyond sparsity.
+\item \emph{Order 32 is not made feasible.} The transition falls where the order-32 tree is widest, which caps
+any rule acting there at about a nine-fold saving, or 28-fold for the triple level.
+\end{itemize}
+Two questions remain open. Why the transition sits near half depth is unexplained; the number of pairs
+between placed and unplaced columns, $k(n-k)$, peaks at $k=n/2$, which suggests a mechanism but proves
+nothing. And the certificates themselves, reconstructed exactly from dual multipliers, have not yet been
+read for a common form.

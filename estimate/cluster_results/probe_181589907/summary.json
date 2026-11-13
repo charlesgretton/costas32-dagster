@@ -1,0 +1,23 @@
+{
+ "job": "181589907", "service_units": 78.0, "walltime_used": "00:22:30",
+ "single_core_rate": 3717000.0,
+ "full_node": {"workers": 104, "per_core_mean": 3143711.5384615385, "per_core_min": 3131000.0, "per_core_max": 3155000.0, "aggregate": 326946000.0},
+ "full_load_slowdown": 1.1823603897891395,
+ "order32_tree": {"estimates": [1.5398e+20, 1.5371e+20, 1.539e+20, 1.5421e+20, 1.539e+20, 1.5354e+20, 1.537e+20, 1.5358e+20],
+   "mean": 1.538124998011149e+20, "stderr": 9.016371692612898e+16, "max_single_probe_share": 0.000198},
+ "validation_depth8": {"subtrees": 96, "counted_exactly": 96, "incomplete_at_cap": 0, "median_subtree_nodes": 1513656123.0,
+   "within_2_stderr": 0.9375, "mean_log_ratio_estimate_over_exact": -0.003881037338709418, "sum_estimate_over_sum_exact": 0.996460183114923},
+ "validation_depth9": {"subtrees": 96, "counted_exactly": 96, "incomplete_at_cap": 0, "median_subtree_nodes": 76905290.0,
+   "within_2_stderr": 0.9479166666666666, "mean_log_ratio_estimate_over_exact": -0.00102724399920825, "sum_estimate_over_sum_exact": 1.0001922268173544},
+ "environment": ["gcc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-28)", "idle MHz: mean 2100 min 2100 max 2100",
+   "/sys/devices/system/cpu/intel_pstate/no_turbo: 0", "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor: powersave",
+   "loaded MHz: mean 2105 min 2100 max 3200"],
+ "latency_report": [
+  "prefixes: 408,470   total nodes: 1.5358e+20 (s.e. 1.25e+17)   rate: 3.144e+06 nodes/core-s",
+  "total work: 1.3570e+10 core-hours = 1.5481e+06 core-years = 2.7140e+07 KSU at 2 SU/core-hour",
+  "largest task: 1.151e+06 core-hours (34.7 x the mean); largest 1% of tasks hold 3.8% of the work",
+  "workers 104: wall 5.437e+06 days, efficiency 100.0%, charged 2.7141e+07 KSU, largest/ideal 0.009",
+  "workers 1040: wall 5.437e+05 days, efficiency 100.0%, charged 2.7143e+07 KSU, largest/ideal 0.088",
+  "workers 10400: wall 5.456e+04 days, efficiency 99.7%, charged 2.7234e+07 KSU, largest/ideal 0.882",
+  "workers 104000: wall 4.797e+04 days, efficiency 11.3%, charged 2.3948e+08 KSU, largest/ideal 8.824"]
+}

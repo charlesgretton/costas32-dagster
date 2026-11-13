@@ -1,0 +1,12 @@
+exact n=10 nodes=152100 solutions=1080 seconds=0.00 rate=4.325e+07
+exact n=10 nodes=67217 classes=277 seconds=0.00 rate=2.423e+07
+exact n=11 nodes=789511 solutions=2509 seconds=0.02 rate=4.775e+07
+exact n=11 nodes=316884 classes=555 seconds=0.01 rate=2.581e+07
+exact n=12 nodes=3488680 solutions=3926 seconds=0.09 rate=4.059e+07
+exact n=12 nodes=1544404 classes=990 seconds=0.06 rate=2.541e+07
+exact n=13 nodes=18290043 solutions=7077 seconds=0.40 rate=4.570e+07
+exact n=13 nodes=7509524 classes=1616 seconds=0.23 rate=3.271e+07
+exact n=14 nodes=83176084 solutions=8626 seconds=1.58 rate=5.280e+07
+exact n=14 nodes=37132082 classes=2168 seconds=1.18 rate=3.134e+07
+exact n=15 nodes=435090280 solutions=10748 seconds=9.71 rate=4.483e+07
+exact n=15 nodes=182409077 classes=2467 seconds=5.84 rate=3.122e+07

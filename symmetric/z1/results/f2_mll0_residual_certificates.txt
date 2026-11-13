@@ -1,0 +1,23 @@
+# f=2, M_LL=0 branch: the four residual configurations after FG+FS sieving.
+# Each line: p q m_1 ... m_15   (m_d = a_d + b_d, doubled centre of the length-d transposition)
+# Recover endpoints by a_d = (m_d - d)/2, b_d = (m_d + d)/2.
+10 18  11 4 53 42 27 10 55 34 9 50 19 46 41 38 29
+12 18  17 4 51 54 5 50 21 38 29 52 15 20 47 26 37
+13 19  45 58 11 8 57 12 41 24 33 10 47 42 15 36 25
+13 21  51 58 9 20 35 52 7 28 53 12 43 16 21 24 33
+#
+# Reflection rho(i)=31-i acts by (p,q) -> (31-q,31-p), m_d -> 62-m_d.
+#   cases 1,4 are reflection-equivalent  -> orbit O_C
+#   cases 2,3 are reflection-equivalent  -> orbit O_A
+#
+# CERTIFICATE C (orbit O_C, representative p=10 q=18)
+#   m_2 - m_9  = 4 - 9  = -5      a_9=0,  a_2=1
+#   m_15 - m_8 = 29 - 34 = -5     b_8=21, b_15=22
+#   radii: 2-9 = -7 = -(15-8)
+#   segments (0,1) and (21,22) both have displacement (1,-6).
+#
+# CERTIFICATE A (orbit O_A, representative p=12 q=18)
+#   2q - m_13 = 36 - 47 = -11     a_13=17, q=18
+#   m_2 - m_11 = 4 - 15 = -11     a_11=2,  b_2=3
+#   radii: -13 = -(11+2)
+#   segments (2,3) and (17,18) both have displacement (1,-12).

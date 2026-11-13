@@ -1,0 +1,28 @@
+# Z=1T, f=0 witnesses. Both independently verified here: valid permutation,
+# valid involution, correct length spectrum, Z recomputed from scratch.
+
+# (1) ORDINARY COVER, L=16 u=0.  Mode-A positive regression test.
+#     lengths {1..15,16}; Z = 35 (so Mode B must reject it)
+0-16 30-31 24-26 22-25 23-27 10-15 5-11 7-14 1-9 3-12 18-28 2-13 17-29 8-21 6-20 4-19
+
+# (2) Z=1 COVER, L=28 u=0.  Mode-B positive regression test.
+#     lengths {1..15,28}; Z = 1, the unique large-large pair being {0,28}
+0-28 7-8 22-24 6-9 21-25 5-10 20-26 4-11 19-27 3-12 13-23 18-29 2-14 17-30 1-15 16-31
+#   h = 28 15 14 12 11 10 9 8 7 6 5 4 3 23 2 1 31 30 29 27 26 25 24 13 22 21 20 19 0 18 17 16
+#   NOT Costas: h(3)-h(1) = h(4)-h(2) = -3, both at lag 2.  Fails FG at k=2.
+
+# (3) PARITY-INFEASIBLE regression: any odd L in this cell. Expect zero covers
+#     in BOTH modes, deductively (c = a mod 2 forces L even when f=0, R empty).
+
+# EXHAUSTIVE CLASSIFICATION OF (L,u)=(28,0)   [z1_jobB_28_0.cpp]
+#   structural-only : search_nodes=323  exact_z1_covers=1   status=EXHAUSTED
+#   costas-aware    : search_nodes=9    costas_covers=0     status=EXHAUSTED
+# So the record admits EXACTLY ONE Z=1 cover (witness 2 above) and it is not Costas.
+#
+# Collision data from the costas-aware run is a DUPLICATE-DISPLACEMENT-DETECTION
+# histogram over rejected placements (23 events across 9 nodes), NOT a
+# first-collision-per-branch histogram:
+#   lag  1: 2   lag  2: 4   lag  3: 3   lag  4: 1
+#   lag 11: 5   lag 13: 7   lag 17: 1
+# Mode is lag 13, not lag 2. The single witness's lag-2 failure is unrepresentative;
+# no low-lag-only obstruction is supported.

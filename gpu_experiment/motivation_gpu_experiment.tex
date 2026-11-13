@@ -1,0 +1,195 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,microtype,hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\title{Motivation and Resource Request:\\GPU Calibration for an Exhaustive Order-32 Costas Search}
+\author{Charles Gretton}
+\date{September 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Orders 32 and 33 are the smallest orders for which the existence of a Costas array remains unknown. This document motivates a controlled GPU experiment for the transpose-symmetric order-32 search. The requested GPU time is not yet for an unsupported production claim. It is for a six-configuration calibration that measures two unresolved hardware effects: warp-level workload imbalance and placement of a per-thread rollback log in compiler-managed local memory versus explicitly managed shared memory. All search semantics, rollback operations, prefix decomposition identities, and CPU/GPU work-unit interfaces have been validated in advance on independent CPU implementations. The GPU experiment is designed to produce byte-comparable per-prefix results and to fail closed on incomplete coverage or any invariant violation.
+\end{abstract}
+
+\section{Background}
+
+A Costas array of order $n$ is a permutation $h$ of $\{0,\ldots,n-1\}$ for which all displacement vectors
+\[
+  (j-i,\,h(j)-h(i)),\qquad 0\le i<j<n,
+\]
+are distinct. The property arose in sonar and radar waveform design and is also a long-standing combinatorial existence problem. Complete enumeration has reached order 29, while arrays are known at orders 30 and 31. Orders 32 and 33 are the first unresolved orders.
+
+The broader research program has already closed two census-complete extension channels for order 32: no order-32 array contains an order-29 Costas array as a three-row and three-column deletion minor, and none contains an order-28 Costas array as a four-row and four-column deletion minor. It has also developed and machine-checked a telescoping-sum propagation rule. These results sharply constrain known construction paths but do not settle the residual existence question. A direct exhaustive search of a mathematically defined symmetry class is therefore a justified next experiment.
+
+This GPU study concerns transpose symmetry,
+\[
+ h=h^{-1}.
+\]
+An involution is built by adding either a fixed point $h(c)=c$ or a transposition $h(c)=r$, $h(r)=c$. The search checks the Costas displacement condition incrementally.
+
+\section{Why order 32 is hardware-favourable}
+
+At order 32, a vertical difference lies in $[-31,31]$, giving 63 possible signed values. For each positive column lag, the complete used-difference domain therefore fits in one 64-bit word. The incremental collision test is a subtraction, a shift and a bitwise intersection. The state contains 32 lag masks and a 32-entry partial involution.
+
+Rollback is represented by a flat log of newly committed displacement bits. A complete order-32 array contains exactly
+\[
+ \binom{32}{2}=496
+\]
+displacements, so 496 packed 16-bit log entries are sufficient and exact. The log is append-only during descent and read in reverse during rollback. The hot masks remain separate from this sequential history.
+
+The open hardware question is where this log should live. With 496 entries, the log occupies 992 bytes per thread. Together with lag masks, candidate-local masks, the DFS stack and the partial involution, explicit thread state exceeds the maximum register allocation. The experiment therefore compares:
+
+\begin{enumerate}
+  \item compiler-managed thread-local storage, which may be cached in L1/L2; and
+  \item a depth-major packed shared-memory log, which gives explicit placement but consumes block-level shared memory and may reduce occupancy.
+\end{enumerate}
+
+For 32 threads per block the shared log requires 31,744 bytes. For 64 threads it requires 63,488 bytes and therefore uses CUDA's opt-in dynamic shared-memory mechanism on Ada-class hardware.
+
+\section{Correctness preparation completed before GPU use}
+
+The experiment is supported by a chain of executable equivalences:
+\[
+\text{mathematical predicate}
+\equiv
+\text{specification checker}
+\equiv
+\text{reference DFS}
+\equiv
+\text{incremental CPU DFS}
+\equiv
+\text{iterative kernel-shaped CPU shim}
+\equiv
+\text{prefix decomposition}.
+\]
+
+The reference checker uses explicit integer displacement pairs rather than bit masks. The incremental implementation uses 64-bit lag masks and candidate-local masks. A dual-engine validation run compares the two candidate predicates throughout complete search trees for small orders. The iterative kernel-shaped implementation reproduces the recursive engine's counters and traversal fingerprints at orders 16 and 20.
+
+The following independent baselines have been established:
+
+\begin{center}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+order & entered nodes & symmetric arrays & maximum log entries \\
+\midrule
+16 & 160,797 & 40 & 120 \\
+20 & 4,710,666 & 8 & 190 \\
+22 & --- & 10 & 231 \\
+24 & 142,822,399 & 0 & 253 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The order-24 search is important for resource planning. Although it finds no transpose-symmetric array, it reaches a partial board with 23 assigned points and uses 253 of the 276 possible order-24 displacement entries. Thus absence of a solution does not prevent near-complete traversal, and the order-32 implementation must provision close to the full 496-entry bound.
+
+Every GPU work unit carries a stable prefix identifier and returns exact counters, traversal and solution fingerprints, log-depth information, exhaustion status and an error code. Results are canonicalised by identifier before writing, so different launch schedules and memory backends remain byte-comparable.
+
+\section{Prefix decomposition and fail-closed coverage}
+
+The search tree is partitioned into valid partial involutions. At order 20 and decision depth 4, the catalogue contains 37,573 work units. Their node counts satisfy
+\[
+4,706,251+4,415=4,710,666,
+\]
+where 4,415 is the number of entered nodes strictly above the cut. Their solution counts sum to 8, exactly matching the root search.
+
+A selective refinement experiment replaces 400 coarse prefixes by all their valid children. The resulting mixed-depth frontier contains 41,479 work units and satisfies
+\[
+4,705,851=4,706,251-400.
+\]
+The solution count remains 8. This local replacement identity audits the frontier transformation itself.
+
+The executable refuses an exhaustive verdict unless every work unit is present exactly once, every work unit reports exhaustion, all internal accounting identities hold, all rollback logs return to their prefix state, all error codes are zero, and GPU result records match the CPU oracle byte for byte. A crash, timeout, missing prefix, duplicate prefix, CUDA launch error or invariant failure produces an incomplete result rather than a zero count.
+
+\section{Why a GPU measurement is necessary}
+
+CPU simulation identified severe warp-level workload imbalance. For the order-20 depth-4 catalogue, subtree sizes have median 79 nodes and maximum 4,105 nodes. If catalogue order is mapped directly to warps, predicted static lane efficiency is only 26.5\%. Exact descending subtree-size order raises the predicted value to 98.4\%.
+
+Inexpensive production proxies do not reproduce the exact ranking. Assigned-point bucketing followed by a two-level valid-descendant score, denoted $b_2$, reaches 63.1\%. Selectively refining the top 400 prefixes ranked by $b_2$ reduces the maximum work unit from 4,105 to 1,182 nodes and raises the exact-ordering ceiling to 99.6\%. However, proxy ordering after refinement reaches only 63.4\%, essentially unchanged from 63.1\% before refinement. Refinement controls the tail but does not solve ranking across the body of the distribution.
+
+These figures are predictions under a lockstep warp model, not measured GPU speed-ups. Multiple resident warps may hide part of the imbalance, while register pressure, local-memory latency and shared-memory occupancy may dominate. Only a real device can determine how strongly predicted lane efficiency maps to elapsed time.
+
+\section{Experimental matrix}
+
+The requested run compares three schedules with two rollback-log backends:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+schedule & predicted lane efficiency & purpose \\
+\midrule
+original depth-4 order & 26.5\% & imbalance baseline \\
+exact size descending & 98.4\% & scheduling ceiling \\
+refined $p$/$b_2$ proxy & 63.4\% & production candidate \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Each schedule is run with:
+
+\begin{enumerate}
+  \item compiler-managed local rollback log; and
+  \item depth-major shared-memory rollback log.
+\end{enumerate}
+
+This gives a six-cell experiment. Every cell consumes the same mathematical frontier appropriate to its schedule and must reproduce the matching canonical CPU result file. The exact schedule is used to compare memory backends without confounding from avoidable warp imbalance.
+
+After correctness is established at 32 threads per block, the local backend is also tested at 64 and 128 threads. The shared backend is tested at 64 threads using 63,488 bytes of opt-in dynamic shared memory. Throughput is reported as entered nodes and candidate attempts per second, not merely prefixes per second.
+
+\section{Measurements to collect}
+
+The experiment records:
+
+\begin{itemize}
+  \item kernel elapsed time and end-to-end elapsed time;
+  \item entered nodes and candidate attempts per second;
+  \item registers per thread and compiler-reported stack/spill bytes;
+  \item local-memory load and store transactions;
+  \item shared-memory transactions and bank conflicts;
+  \item achieved occupancy and eligible warps per cycle;
+  \item branch and warp execution efficiency;
+  \item long-scoreboard stalls;
+  \item exact result-file equality against the CPU oracle.
+\end{itemize}
+
+The principal comparisons are:
+
+\begin{enumerate}
+  \item original versus exact schedule, estimating how much of the predicted scheduling range survives latency hiding;
+  \item local versus shared log under exact scheduling, isolating memory placement;
+  \item the refined production proxy versus the exact ceiling, deciding whether further body-ranking work is justified;
+  \item 32, 64 and 128 threads per block for the local backend, and 32 versus 64 for shared memory.
+\end{enumerate}
+
+\section{Requested GPU allocation}
+
+The calibration workload is intentionally modest. The order-20 oracle contains approximately 4.7 million entered nodes per run. The six-cell matrix, correctness reruns, block-size variants, warm-up runs and Nsight Compute profiling should fit comfortably within a single booked session on one CUDA-capable NVIDIA GPU. A practical request is:
+
+\begin{itemize}
+  \item one NVIDIA Ada, Ampere or Hopper GPU with at least 64~KiB opt-in shared memory per block;
+  \item CUDA Toolkit, \texttt{nvcc}, \texttt{cuobjdump} and Nsight Compute;
+  \item 4 hours of exclusive or low-contention access for compilation, validation, repeated timing and profiling;
+  \item sufficient local storage for catalogues, canonical result files and profiler reports, conservatively 10~GB;
+  \item permission to retain compiler logs, CUDA version, driver version, GPU properties and Nsight reports as reproducibility artefacts.
+\end{itemize}
+
+Four hours provides margin for compiler iterations and profiler overhead. The raw calibration kernels are expected to be much shorter than the booking window. No multi-GPU allocation is required for this phase.
+
+\section{Expected outcomes and decision rule}
+
+The experiment is designed to answer two binary engineering questions.
+
+First, if exact ordering is substantially faster than catalogue order, then warp imbalance remains visible after latency hiding and production scheduling deserves further development. If measured performance is close despite the 26.5\% versus 98.4\% predicted efficiencies, the existing 63.4\% proxy is likely sufficient.
+
+Second, if the shared-memory log materially outperforms the local log under the same exact schedule, the production kernel should use explicit depth-major shared storage and an empirically selected block size. If local memory is competitive or faster, its simpler residency model should be retained.
+
+A configuration is eligible for performance comparison only after its canonical result file is byte-identical to the CPU oracle. Correctness is a gate, not a metric that may be traded for speed.
+
+\section{Significance}
+
+The requested GPU time is the first stage that genuinely requires device hardware. The mathematical predicate, incremental mask logic, sparse rollback, iterative DFS, change-log capacity, prefix decomposition, workload distribution and candidate scheduling strategies have all been tested on CPU. This preparation reduces the GPU campaign to a controlled resource-placement and scheduling experiment.
+
+If the calibration succeeds, the same fail-closed work-unit interface can be used to estimate the resources required for the order-32 transpose-symmetric exhaustion. More broadly, the experiment provides a reproducible pattern for converting a large combinatorial non-existence computation into independently checkable work units whose CPU and GPU executions agree at the level of traversal fingerprints and exact counters.
+
+\end{document}

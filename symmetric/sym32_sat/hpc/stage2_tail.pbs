@@ -1,0 +1,20 @@
+#!/bin/bash
+# STAGE 2 -- Arms B and C on the Stage-1 TAIL only (regions Kissat did not finish, or
+# finished slowly). Answers Q2 (Dagster cost) and Q3 (does splitting cut the tail?).
+# B uses 3 ranks per region, so 3 cores per shard: 34 shards on one node.
+#   STAGE1=$COSTAS_DATA/results/stage1_<id> qsub -v STAGE1 hpc/stage2_tail.pbs
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=104,mem=480GB,walltime=10:00:00,jobfs=4GB
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas-s2
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-.}"; source hpc/env.sh
+[ -n "${STAGE1:-}" ] || { echo "set STAGE1 to the stage-1 results directory"; exit 1; }
+OUT="$COSTAS_DATA/results/stage2_${PBS_JOBID:-local}"; mkdir -p "$OUT"
+python3 hpc/select_tail.py "$STAGE1/ledger.jsonl" "${SLOW:-120}" > "$OUT/tail.txt"
+echo "tail regions: $(wc -l < "$OUT/tail.txt")"
+[ -s "$OUT/tail.txt" ] || { echo "EMPTY TAIL: Kissat finished every sampled region fast. Q1 answered."; exit 0; }
+bash hpc/run_shards.sh "$OUT/tail.txt" "$OUT" "${CAP:-600}" B,C,D 3 102
+for a in kissat_split_agg dagster_mono dagster_native_split; do python3 hpc/stage_report.py "$OUT/ledger.jsonl" $a; done | tee "$OUT/report.txt"

@@ -1,0 +1,392 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,longtable,array,enumitem,microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor,listings}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{problem}[theorem]{Problem}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{Remark}
+\newcommand{\C}{\mathcal C}
+\newcommand{\V}{\mathcal V}
+\newcommand{\R}{\mathfrak R}
+\newcommand{\1}{\mathbf 1}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\F}{\mathbb F}
+\DeclareMathOperator{rank}{rank}
+\DeclareMathOperator{AllDifferent}{AllDifferent}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,frame=single,columns=fullflexible}
+\title{Costas Arrays at Order 32: Exact Reformulations, Cross-Lag Identities, Bounded Defect Radius, and a Dyadic Filtration}
+\author{A self-contained research record}
+\date{16 September 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+This document consolidates the mathematically valid end-state of a sustained investigation into order-$32$ Costas arrays.  It distinguishes proved identities and exact computational formulations from open targets.  The main contributions are: a precise analysis of deletion and extension; an exact Fourier collision identity and cross-lag defect energy; a compression of the Costas condition to non-zero mixed second differences of a permutation; exact counts of the resulting constraints and radius-bounded subsystems; a bounded-run lemma; a rigorous certification protocol; an exact $2$-adic filtration of rectangle defects; a universal parity lower bound for diagonal defects; and a mod-$4$ balanced-residue optimisation problem.  A verified stochastic computation gives the rigorous upper bound $m_2\le16$, while the exact value of $m_2$ remains open in the present record.
+\end{abstract}
+\tableofcontents
+
+\section{Costas arrays and present status}
+\begin{definition}
+An order-$N$ Costas permutation is a permutation
+\[p:\{0,\ldots,N-1\}\to\{0,\ldots,N-1\}\]
+such that, for every lag $d\in\{1,\ldots,N-1\}$, the differences
+\[\Delta_d(r)=p_{r+d}-p_r,\qquad 0\le r<N-d,\]
+are pairwise distinct.  The set of these permutations is denoted $\C_N$.
+\end{definition}
+Equivalently, the displacement vectors $(d,p_{r+d}-p_r)$ between pairs of dots are all distinct.  Enumeration is complete through order $29$; the known total at order $29$ is $164$ when square symmetries are counted separately.  The existence of an order-$32$ Costas array remains unresolved in the sources audited during this investigation.  Known finite-field constructions do not classify all Costas arrays, so failure of a standard construction at a particular order is not a non-existence theorem.
+
+\section{Deletion, compression, and cross-order relations}
+\subsection{Coarse deletion}
+Represent $B\in\C_n$ by $P=\{(i,b_i):0\le i<n\}$.  For a set $S$ of $r$ selected dots, define on surviving coordinates
+\[\phi_S(i)=i-\#\{(x,y)\in S:x<i\},\qquad
+  \psi_S(j)=j-\#\{(x,y)\in S:y<j\}.\]
+The compressed deletion $A=B\setminus_r S$ is defined by
+\[a_{\phi_S(i)}=\psi_S(b_i),\qquad (i,b_i)\in P\setminus S.\]
+Because $B$ is a permutation, the deleted row coordinates and column coordinates are distinct, and $A$ is an order-$(n-r)$ permutation.
+
+\begin{proposition}[Exact coarse-minor test]
+The compressed deletion $A$ is Costas if and only if, for every positive compressed horizontal lag, its corresponding compressed vertical differences are pairwise distinct.
+\end{proposition}
+This is a computable relation, denoted $A\preceq_r B$.  It may be interpreted either as one simultaneous deletion or as a strict chain of single deletions; these are different relations and must not be conflated.
+
+\subsection{Corner deletion is sufficient, not necessary}
+Deleting a corner dot removes a boundary row and boundary column.  In each coordinate all surviving points are either unchanged or uniformly translated, so all surviving displacement vectors are unchanged.  Hence corner deletion always preserves the Costas condition.
+
+It is not necessary.  The order-$4$ Costas permutation
+\[(1,2,4,3)\]
+loses the non-corner point $(2,2)$ and compresses to
+\[(1,3,2),\]
+which is an order-$3$ Costas permutation.  Conversely, arbitrary interior deletion may create a collision because compression is piecewise:
+\[\widetilde x=x-\1[x>x_0],\qquad \widetilde y=y-\1[y>y_0].\]
+Thus interior deletion may or may not preserve the property.
+
+\subsection{Consequences for seeded extension}
+An upward search from the complete order-$29$ catalogue proves only the non-existence of order-$32$ arrays lying in the extension closure of those seeds under the chosen operation.  Global exhaustion requires a separate coverage or ancestry theorem.  No universal downward-heredity theorem of the required kind was established.
+
+\section{Exact insertion capacity}
+For a general one-point insertion at row rank $x$ and value rank $y$, expand old coordinates by
+\[i^{(x)}=i+\1[i\ge x],\qquad p_i^{(y)}=p_i+\1[p_i\ge y],\]
+and insert $(x,y)$.  Define
+\[X_1(A)=\#\{(x,y)\in\{0,\ldots,n\}^2:\operatorname{Ins}_{x,y}(A)\in\C_{n+1}\}.\]
+Higher capacities may mean either direct coarse insertion or a strict chain of Costas intermediates; the convention must be stated.  A model that merely appends a rightmost point without expanding old values tests only a boundary-special case and is not the full extension relation.
+
+\section{Fourier representation of collisions}
+Choose an integer modulus $M\ge2N-1$ and $\zeta=e^{2\pi i/M}$.  This size is essential: using $N$th roots aliases the distinct signed differences $-1$ and $N-1$.
+
+For fixed lag $d$, let
+\[c_d(v)=\#\{r:p_{r+d}-p_r=v\},\qquad
+F_d(t)=\sum_r\zeta^{t(p_{r+d}-p_r)}=\sum_v c_d(v)\zeta^{tv}.\]
+
+\begin{theorem}[Exact Fourier collision identity]
+For every lag $d$,
+\[\frac1M\sum_{t=0}^{M-1}|F_d(t)|^2=\sum_v c_d(v)^2.\]
+Hence
+\[\frac1M\sum_t|F_d(t)|^2-(N-d)
+=\sum_v c_d(v)(c_d(v)-1),\]
+which is exactly the number of ordered non-trivial collisions at lag $d$.
+\end{theorem}
+\begin{proof}
+Expand the square and apply character orthogonality.  Since $M\ge2N-1$, congruence of two possible signed differences modulo $M$ is ordinary equality.
+\end{proof}
+Thus the Costas property is the equality case
+\[\frac1M\sum_t|F_d(t)|^2=N-d\quad\text{for every }d.\]
+Parseval does not require a flat spectrum and does not prohibit peaks.  Under normalisation by the number of terms, triangle inequality also precludes amplitudes greater than one.
+
+\section{Cross-lag cocycles and exact defect energy}
+The lag differences obey the additive cocycle identity
+\[\Delta_{d+e}(r)=\Delta_d(r)+\Delta_e(r+d).\]
+Put $m=N-d-e$ and
+\[a_r=\Delta_d(r),\quad b_r=\Delta_e(r+d),\quad c_r=\Delta_{d+e}(r)=a_r+b_r.\]
+Define
+\[A(t)=\sum_{r=0}^{m-1}\zeta^{ta_r},\quad
+B(t)=\sum_{r=0}^{m-1}\zeta^{tb_r},\quad
+C(t)=\sum_{r=0}^{m-1}\zeta^{tc_r},\]
+and the pointwise spectral defect
+\[D_{d,e}(t)=m-A(t)-B(t)+C(t).
+\]
+The cocycle gives the factorisation
+\[D_{d,e}(t)=\sum_r(1-\zeta^{ta_r})(1-\zeta^{tb_r}).\]
+Consequently,
+\[|D_{d,e}(t)|^2\le4(m-\Re A(t))(m-\Re B(t)).\]
+
+Let $E_a,E_b,E_c$ be the ordered internal collision excesses of the three sequences.  Let
+\[P_{ab}=\#\{(r,s):a_r=b_s\},\quad
+P_{ac}=\#\{(r,s):a_r=c_s\},\quad
+P_{bc}=\#\{(r,s):b_r=c_s\}.\]
+
+\begin{theorem}[Exact cross-lag defect energy]
+\[Q_{d,e}:=\frac1M\sum_t|D_{d,e}(t)|^2
+=m^2+3m+E_a+E_b+E_c+2P_{ab}-2P_{ac}-2P_{bc}.\]
+For a Costas permutation,
+\[Q_{d,e}=m^2+3m+2(P_{ab}-P_{ac}-P_{bc}).\]
+\end{theorem}
+\begin{proof}
+Expand $|m-A-B+C|^2$.  The linear averages of $A,B,C$ vanish because positive-lag differences are nonzero.  Character orthogonality converts squared terms into internal equality counts and cross terms into the three overlap counts.
+\end{proof}
+For Costas permutations, each component sequence is injective, so $0\le P_{xy}\le m$ and
+\[m^2-m\le Q_{d,e}\le m^2+5m,\qquad Q_{d,e}\equiv0\pmod2.\]
+
+If $\mathcal A,\mathcal B,\mathcal C$ are the corresponding value sets and $P_{abc}=|\mathcal A\cap\mathcal B\cap\mathcal C|$, inclusion--exclusion gives
+\[P_{ab}+P_{ac}+P_{bc}-P_{abc}\ge N-3(d+e)+2.\]
+This is a forced cross-lag overlap, but not a collision: reuse of the same vertical value across different lags is permitted.
+
+\subsection{Automatic shifted-window overlap}
+For $d=e=r$, the two component sets are shifted subwindows of the same lag-$r$ row.  If that row is injective, then
+\[P_{ab}^{r,r}=\max(0,N-3r).\]
+For $N=32,r=2$, this gives $P_{ab}^{2,2}=26$.  Hence raw overlap counts must be quotiented by index-forced overlap before being interpreted as additive pressure.
+
+\section{First differences, interval sums, and rectangle defects}
+Let
+\[x_i=p_{i+1}-p_i,\qquad 0\le i<N-1,\]
+and define window sums
+\[W_{\ell,r}=\sum_{i=r}^{r+\ell-1}x_i=p_{r+\ell}-p_r.\]
+The Costas condition is exactly that, for each fixed $\ell$, the values $W_{\ell,r}$ are pairwise distinct.
+
+For $\ell,h\ge1$, define
+\[R_{\ell,h,r}=p_{r+\ell+h}-p_{r+\ell}-p_{r+h}+p_r.
+\]
+Then
+\[R_{\ell,h,r}=W_{\ell,r+h}-W_{\ell,r}=W_{h,r+\ell}-W_{h,r},\]
+so $R_{\ell,h,r}=R_{h,\ell,r}$.
+
+\begin{theorem}[Mixed-difference characterisation]
+A permutation $p$ is Costas if and only if
+\[R_{\ell,h,r}\ne0\]
+for all positive $\ell,h$ and all $r$ such that $r+\ell+h\le N-1$.
+\end{theorem}
+For $\ell\ne h$, zero defect is a four-point parallelogram collision.  For $\ell=h$, the middle indices coincide and the condition becomes
+\[p_r+p_{r+2\ell}\ne2p_{r+\ell},\]
+forbidding an index three-term arithmetic progression from mapping to a value progression.
+
+\section{Exact counting at order 32}
+The directed triples $(r,\ell,h)$ are in bijection with $0\le a<b<c\le31$ via
+\[a=r,\quad b=r+\ell,\quad c=r+\ell+h.\]
+Hence there are
+\[\binom{32}{3}=4960\]
+directed defect conditions.  The diagonal count is
+\[\sum_{\ell=1}^{15}(32-2\ell)=240.\]
+After quotienting by $R_{\ell,h,r}=R_{h,\ell,r}$, there are
+\[240+\frac{4960-240}{2}=2600\]
+distinct defect expressions, arising from 240 unordered shapes $\{\ell,h\}$.
+
+For interaction radius $R$, define
+\[\Omega(R)=\{(\ell,h,r):1\le\ell\le h,\ \ell+h\le R,\ 0\le r\le31-\ell-h\}.\]
+The directed count is
+\[C(R)=\frac{R(R-1)(94-2R)}6.\]
+If $q=\lfloor R/2\rfloor$, the included diagonal count is
+\[D(R)=q(31-q),\]
+and the duality-quotiented count is
+\[C_{\rm dual}(R)=\frac{C(R)+D(R)}2.\]
+Selected exact values are
+\begin{center}
+\begin{tabular}{rrrr}
+\toprule
+$R$ & $C(R)$ & $D(R)$ & $C_{\rm dual}(R)$\\
+\midrule
+6&410&84&247\\
+8&728&108&418\\
+10&1110&130&620\\
+16&2480&184&1332\\
+31&4960&240&2600\\
+\bottomrule
+\end{tabular}
+\end{center}
+The number of unordered shapes through radius $R$ is $\lfloor R^2/4\rfloor$.
+
+\section{Pure radius and assisted systems}
+Define the pure radius system
+\[\R_{32}(R)=\{p\in S_{32}:R_{\ell,h,r}\ne0\text{ for all }(\ell,h,r)\in\Omega(R)\}.\]
+Then
+\[\R_{32}(2)\supseteq\cdots\supseteq\R_{32}(31)=\C_{32}.\]
+Define
+\[\rho(p)=\min\{\ell+h:R_{\ell,h,r}=0\text{ for some }r\},\]
+with $\rho(p)=\infty$ for Costas permutations.  Then
+\[p\in\R_{32}(R)\iff \rho(p)>R.\]
+If $\rho_{\max}(32)=\max_{p\in S_{32}}\rho(p)$ is finite, then
+\[R_{\min}:=\min\{R:\R_{32}(R)=\varnothing\}=\rho_{\max}(32).\]
+An exact-radius result requires both an UNSAT certificate at $R^\star$ and a witness in $\R_{32}(R^\star-1)$.
+
+A pure radius model must not import global lag-row all-different constraints.  At lag $\ell$, it enforces only
+\[W_{\ell,r}\ne W_{\ell,s}\quad\text{when }0<|s-r|\le R-\ell.\]
+These constraints form overlapping cliques on consecutive blocks of at most $R-\ell+1$ starts.  Global matching on the entire lag row belongs to a radius-assisted or full Costas model and cannot establish pure locality.
+
+Value complement and index reversal generate a safe Klein four-group for every pure radius system.  Transposition, which maps $p$ to $p^{-1}$, is safe for the full Costas system but not automatically for a truncated horizontal-radius system.
+
+\section{Local pruning lemmas}
+\begin{lemma}[Bounded same-sign runs]
+In an order-$N$ Costas permutation, every same-sign run among the first differences has length
+\[q\le\left\lfloor\frac{\sqrt{8N-7}-1}{2}\right\rfloor.\]
+In particular, for $N=32$, $q\le7$.
+\end{lemma}
+\begin{proof}
+In a positive run, lag-$1$ injectivity makes the $q$ positive integers distinct, so their sum is at least $1+\cdots+q=q(q+1)/2$.  The endpoint displacement is at most $N-1$.  Apply the same argument after negation to a negative run.
+\end{proof}
+This is a pruning lemma, not a symmetry break.  It is not a consequence of a small pure-radius model because its proof uses global lag-$1$ injectivity.
+
+For interval-domain propagation, assigned and available positive and negative signed values may be used to produce safe enclosing bounds.  With unfixed signs, exact extremal bounds under lag-$1$ distinctness are weighted bipartite assignment problems.  For a complete lag row with domains $\mathcal D_{\ell,r}$, Hall's condition is equivalent to existence of a full bipartite matching.  In a pure radius model, the corresponding object is list colouring of the bounded-distance comparison graph rather than a global all-different matching.
+
+\section{Certification principles}
+A checked UNSAT result requires: (i) a faithful encoding; (ii) separately justified symmetry breaking that retains an orbit representative; (iii) a checkable UNSAT proof or complete branch decomposition; and (iv) independent verification.  If $F_R$ encodes $\R_{32}(R)$, $S_R$ is a sound symmetry break, and $\mathcal P_R$ proves $F_R\wedge S_R$ UNSAT, then $\R_{32}(R)=\varnothing$.
+
+Deletion-based shape minimisation returns an inclusion-minimal core, not necessarily a minimum-cardinality core.  Intersecting independently found UNSAT cores need not give an UNSAT set.  Every retained core must itself be independently verified.
+
+\section{What absence of algebraic constructions does not prove}
+Failure of a Welch or Golomb parameter excludes only that recipe.  It does not partition all arrays into a classified algebraic class and a rigorously intrinsic sporadic class.  Cyclotomic expressions in $\Z[\zeta_{32}]$ do not canonically reduce to permutation values modulo 32, and imposing Galois invariance would search only a special subclass unless an inverse theorem were proved.  Likewise, a vertical difference may repeat at different horizontal lags, so it is not a globally unique Ramsey colour.
+
+An exact algebraic encoding is the Laurent polynomial
+\[A(X,Y)=\sum_{i=0}^{31}X^iY^{p_i}.\]
+The coefficient of $X^dY^v$ in $A(X,Y)A(X^{-1},Y^{-1})$ counts occurrences of displacement $(d,v)$.  The Costas property says all nonzero-horizontal coefficients are in $\{0,1\}$.  Quotienting by $X^{32}=Y^{32}=1$ changes the aperiodic problem by aliasing differences, so periodic and circular theories must be kept distinct.
+
+\section{Exact dyadic filtration at order 32}
+At order 32,
+\[-62\le R_{\ell,h,r}\le62.\]
+Therefore
+\[R_{\ell,h,r}=0\text{ in }\Z
+\iff R_{\ell,h,r}\equiv0\pmod{64}.\]
+For any selected canonical defect family $\Omega$, define
+\[Z_k(p;\Omega)=\#\{\omega\in\Omega:2^k\mid R_\omega(p)\}.\]
+Then
+\[Z_1\ge Z_2\ge\cdots\ge Z_6,\]
+and for the full family
+\[p\in\C_{32}\iff Z_6(p;\Omega_{32})=0.\]
+
+\begin{theorem}[Exact dyadic escape recurrence]
+Let
+\[S_k=\sum_{\substack{\omega\in\Omega\\2^k\mid R_\omega}}(-1)^{R_\omega/2^k}.\]
+Then
+\[Z_{k+1}=\frac{Z_k+S_k}{2}.\]
+Equivalently, if $E_k=\#\{\omega:2^k\parallel R_\omega\}$, then
+\[Z_{k+1}=Z_k-E_k.\]
+\end{theorem}
+\begin{proof}
+For a level-$k$ survivor, the indicator of one more factor of two is
+\[\frac{1+(-1)^{R_\omega/2^k}}2.\]
+Sum over $\Omega$.
+\end{proof}
+
+Write
+\[p_i=\sum_{j=0}^4 2^jb_{j,i},\qquad b_{j,i}\in\{0,1\},\]
+and
+\[A_{j,\omega}=b_{j,r+\ell+h}-b_{j,r+\ell}-b_{j,r+h}+b_{j,r}.\]
+If $2^k\mid R_\omega$, define the carry state
+\[\kappa_{k,\omega}=2^{-k}\sum_{j=0}^{k-1}2^jA_{j,\omega}.\]
+Then the exact lifting condition is
+\[2^{k+1}\mid R_\omega
+\iff 2^k\mid R_\omega\text{ and }\kappa_{k,\omega}+A_{k,\omega}\equiv0\pmod2.\]
+
+\section{Universal parity bound for diagonal defects}
+For diagonal defects
+\[D_{\ell,r}=p_{r+2\ell}-2p_{r+\ell}+p_r,\]
+let $\varepsilon_i=(-1)^{p_i}$.  Since there are 16 even and 16 odd values, $\sum_i\varepsilon_i=0$.  Modulo two,
+\[2\mid D_{\ell,r}\iff p_r\equiv p_{r+2\ell}\pmod2.\]
+Let
+\[e_0=\#\{i\text{ even}:p_i\text{ even}\}.\]
+The parity incidence table is forced to be
+\[\begin{array}{c|cc}
+& p_i\text{ even}&p_i\text{ odd}\\\hline
+i\text{ even}&e_0&16-e_0\\
+i\text{ odd}&16-e_0&e_0
+\end{array}\]
+and the number of diagonal defects even modulo two is
+\[Z_1^{\rm diag}=2\binom{e_0}{2}+2\binom{16-e_0}{2}
+=2(e_0-8)^2+112.\]
+
+\begin{theorem}[Diagonal parity floor]
+Every order-$32$ permutation has at least 112 diagonal defects divisible by two:
+\[Z_1^{\rm diag}\ge112.\]
+Equality holds exactly when $e_0=8$.
+\end{theorem}
+
+\section{The exact mod-4 diagonal optimisation}
+Let $q_i=p_i\bmod4$.  Every residue in $\Z/4\Z$ occurs exactly eight times.  Define
+\[Z_2^{\rm diag}(q)=\sum_{\ell=1}^{15}\sum_{r=0}^{31-2\ell}
+\1[q_r+q_{r+2\ell}-2q_{r+\ell}\equiv0\pmod4],\]
+and
+\[m_2=\min_{\substack{q\in(\Z/4\Z)^{32}\\\#q^{-1}(s)=8\ \forall s}} Z_2^{\rm diag}(q).\]
+The balanced search space has exact size
+\[\frac{32!}{(8!)^4}=99,561,092,450,391,000.\]
+
+Write $q_i=u_i+2v_i$ with $u_i,v_i\in\{0,1\}$.  For a diagonal triple $(i,j,k)$,
+\[4\mid q_i+q_k-2q_j
+\iff u_i=u_k\text{ and }v_i\oplus v_k=u_i\oplus u_j.\]
+The high bit $v_j$ of the midpoint does not enter this lift.  Equivalently, if the midpoint is even, endpoint residues sum to $0$ modulo four; if the midpoint is odd, they sum to $2$ modulo four.
+
+A zero-survivor word would prove $m_2=0$ and, because every balanced residue word lifts to a permutation, would produce a permutation with no diagonal integer collision.  An UNSAT proof for zero would establish only $m_2\ge1$; successive decision bounds are required to determine the exact optimum.
+
+\section{Computed upper bound for $m_2$}
+A balance-preserving stochastic search over residue swaps found
+\[q=(2,3,1,2,2,0,0,3,0,3,1,1,0,1,1,3,
+3,2,3,2,0,1,3,0,0,2,2,1,2,1,3,0),\]
+with eight occurrences of every residue and
+\[Z_2^{\rm diag}(q)=16.\]
+An independent evaluator checked all 240 diagonal triples.  Therefore
+\[\boxed{0\le m_2\le16.}\]
+The shape profile is
+\[(z_{2,1},\ldots,z_{2,15})=(0,1,0,1,2,1,0,1,0,10,0,0,0,0,0).\]
+The 16 survivors $(\ell,r;q_r,q_{r+\ell},q_{r+2\ell})$ are
+\begin{align*}
+&(2,19;2,1,0),\ (4,7;3,1,3),\ (5,1;3,0,1),\ (5,11;1,3,1),\\
+&(6,5;0,1,2),\ (8,13;1,1,1),\\
+&(10,0;2,1,0),\ (10,2;1,0,3),\ (10,3;2,1,0),\ (10,4;2,1,0),\\
+&(10,5;0,3,2),\ (10,6;0,3,2),\ (10,7;3,2,1),\ (10,8;0,3,2),\\
+&(10,9;3,2,1),\ (10,10;1,0,3).
+\end{align*}
+The concentration at $\ell=10$ is a property of this witness, not yet a universal extremal theorem.  An exact MILP run did not close the lower-bound gap; the exact value of $m_2$ remains undetermined here.
+
+\section{Exact decision model for $m_2$}
+Use 32 four-valued variables $q_i$, or 64 bits $u_i,v_i$, with exact four-way balance.  A zero-survivor feasibility model forbids, for each of the 240 diagonal triples, the eight five-bit assignments satisfying
+\[u_i=u_k,\qquad v_i\oplus v_k=u_i\oplus u_j.\]
+Translation $q_i\mapsto q_i+\gamma$ preserves balance and the objective, so $q_0=0$ is a safe normalisation.  Negation and normalised index reversal are further symmetries, but full lex-leader constraints must be proved carefully.
+
+For a bound $B$, introduce exact survivor indicators and impose
+\[\sum_\omega z_\omega\le B.\]
+The first satisfiable $B$ following certified UNSAT bounds $0,\ldots,B-1$ is $m_2$.  A portable theorem should combine an explicit attaining word with a checked CNF UNSAT certificate for $B=m_2-1$.
+
+\section{Open mathematical targets}
+\begin{enumerate}[label=\arabic*.]
+\item Determine the exact value of $m_2$.
+\item If $m_2>0$, classify the survivor masks or shape profiles of minimisers and formulate the mod-$8$ lift conditioned on those masks.
+\item If $m_2=0$, incorporate off-diagonal rectangles; diagonal information alone cannot settle order 32.
+\item Compute the pure information radius $R_{\min}$, if finite, with an UNSAT certificate at $R_{\min}$ and a witness at $R_{\min}-1$.
+\item Extract individually certified inclusion-minimal shape cores.
+\item Seek a theorem that couples the finite displacement alphabet, additive cocycles, and same-lag injectivity to force a monochromatic collision.
+\item Investigate whether a $2$-adic survival lower bound requires a state vector indexed by shapes and carry states rather than the scalar $Z_k$.
+\end{enumerate}
+
+\section{Reference implementation archive}
+The accompanying archive contains the source files actually written and run during the computational part of this investigation, together with captured stochastic-search logs.  The scripts include two MILP formulations using SciPy/HiGHS and two C++ balance-preserving annealers.  They are exploratory software, not certified proof checkers.  The verified mathematical output retained in this document is the explicit balanced score-16 word and the resulting upper bound $m_2\le16$.
+
+\begin{thebibliography}{9}
+\bibitem{Drakakis29}
+K. Drakakis, F. Iorio, S. Rickard, and J. Walsh,
+``Results of the Enumeration of Costas Arrays of Order 29,''
+\emph{Advances in Mathematics of Communications}, 5(3), 547--553, 2011.
+
+\bibitem{TaylorSurvey}
+K. Taylor, S. Rickard, and K. Drakakis,
+``Costas Arrays: Survey, Standardization, and MATLAB Toolbox,''
+\emph{ACM Transactions on Mathematical Software}, 37(4), Article 41, 2011.
+
+\bibitem{JedwabWodlinger}
+J. Jedwab and J. Wodlinger,
+``Structural Properties of Costas Arrays,'' 2014.
+
+\bibitem{Panario}
+D. Panario, B. Stevens, and Q. Wang,
+``Ambiguity and Deficiency in Costas Arrays and APN Permutations,''
+LATIN 2010, LNCS 6034, 397--406.
+
+\bibitem{RubioTorres}
+I. Rubio and J. Torres,
+``Circular Costas Maps: A Multidimensional Analog of Circular Costas Sequences,''
+2022/2023.
+\end{thebibliography}
+\end{document}

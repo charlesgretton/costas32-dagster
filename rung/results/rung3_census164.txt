@@ -1,0 +1,16 @@
+CATALOGUE source=/tmp/cat29_census.txt
+CATALOGUE order=29 entries=164 distinct=164 d4_orbits=23 all_score_zero=yes
+CATALOGUE d4_closed=yes
+CENSUS expected arrays=164 orbits=23  -> arrays=MATCH orbits=MATCH
+CATALOGUE using 23 canonical representatives (exact for existence and minimum)
+RUNG order=29 k=3 mode=canonical cores=23 catalogue_hash=ed80ecf4c412d783 unit=0/1 core_range=[0,23) thresh=4
+STATUS EXHAUSTED
+COUNTS placements=565836800 survivors=420 configs=2520 costas=0 elapsed=12.7
+HIST 0:0 1:0 2:0 3:0 4:3
+BEST_CORE_INTACT 4   (core-first pruning makes score 0 exact; the
+                        histogram above score 0 counts only configurations
+                        whose core carries no repeated displacement)
+LOW score=4 core=9 delC=0,30,31 delR=0,30,31 perm=31 2 8 26 18 25 15 16 19 28 24 12 7 23 9 29 27 21 3 11 4 14 13 10 1 5 17 22 6 20 0 30
+LOW score=4 core=17 delC=0,30,31 delR=0,30,31 perm=30 6 19 12 20 25 22 18 8 26 17 1 29 28 9 24 13 14 16 2 11 23 3 7 10 5 27 4 21 15 31 0
+LOW score=4 core=22 delC=0,30,31 delR=0,30,31 perm=31 10 27 28 8 5 3 12 18 22 4 23 15 20 13 29 19 2 1 21 24 26 17 11 7 25 6 14 9 16 30 0
+END unit=0

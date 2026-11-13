@@ -1,0 +1,332 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,longtable,array,microtype,xcolor,hyperref,fancyhdr}
+\definecolor{navy}{RGB}{24,55,91}
+\hypersetup{colorlinks=true,linkcolor=navy,urlcolor=navy,pdftitle={Non-existence in branch Z=1T, f=4 for transpose-symmetric Costas arrays of order 32}}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}\fancyhf{}\lhead{Order-32 Costas campaign}\rhead{$Z=1\mathrm T$, $f=4$}\cfoot{\thepage}
+\newtheorem{theorem}{Theorem}[section]\newtheorem{lemma}[theorem]{Lemma}\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}\newtheorem{remark}[theorem]{Remark}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\abs}[1]{\left|#1\right|}
+\title{\textbf{Non-existence of transpose-symmetric Costas arrays of order 32\\in the branch $Z=1\mathrm T$, $f=4$}\\[1ex]\large A reproducible full-Costas census}
+\author{Order-32 Costas investigation}
+\date{21 September 2026}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We exclude transpose-symmetric Costas permutations of order $32$ in the branch $Z=1\mathrm T$, $f=4$.  In this branch the involution has four fixed points, one transposition of length at least $16$, and thirteen transpositions of short lengths; the unique large--large displacement is supplied by the long transposition.  Independent enumeration gives $5{,}470$ admissible four-mark fixed-point rulers of diameter at most $15$, no ruler fixed by board reflection, and hence $2{,}735$ reflection-canonical outer roots.  For each ruler the search internally enumerates the long transposition and the two omitted short lengths.  The independently derived integrated parameter space contains $297{,}838$ endpoint-compatible long placements and $15{,}642{,}886$ parity-admissible tuples.
+
+A complete full signed-displacement Costas census exhausted all $2{,}735$ outer roots.  It processed $24{,}869{,}010{,}589$ recursive nodes and found no Costas cover.  Independent retally reproduced the complete key set and both parameter-space totals, with no missing, unexpected, duplicated, malformed or incomplete records, no CSV/log discrepancies, and no survivor files.  The branch is therefore closed under Evidence Class F.  Since all other $Z=1$ branches in the transpose-symmetric order-$32$ decomposition are already closed, every remaining transpose-symmetric candidate must satisfy $Z\ge2$.
+\end{abstract}
+
+\section*{Executive summary}
+\addcontentsline{toc}{section}{Executive summary}
+\begin{itemize}
+\item \textbf{Claim.} No transpose-symmetric Costas permutation of order $32$ lies in the branch $Z=1\mathrm T$, $f=4$.
+\item \textbf{Root space.} Exhaustive first-principles enumeration gives $5{,}470$ raw four-mark Golomb rulers of diameter at most $15$, zero board-reflection-fixed rulers, $2{,}735$ reflection-canonical rulers, $282$ translation-normalised oriented shapes, and $141$ shapes up to translation and reflection.
+\item \textbf{Internal parameter space.} The outer roots generate exactly $297{,}838$ endpoint-compatible long placements $(F,L,u)$ and $15{,}642{,}886$ parity-admissible tuples $(F,L,u,r,s)$.
+\item \textbf{Census.} All $2{,}735$ roots terminated under predicate \code{EXACT\_Z1T\_F4\_AND\_FULL\_COSTAS}; every terminal status was \code{EXHAUSTED\_NO\_COSTAS\_Z1T\_F4\_COVER}.
+\item \textbf{Outcome.} The census found zero structural completions, zero Costas covers, and zero survivors after $24{,}869{,}010{,}589$ recursive nodes.
+\item \textbf{Audit.} Independent retally found $2{,}735$ logs and $2{,}735$ matching result CSVs, with zero missing or unexpected keys, duplicates, malformed records, CSV/log mismatches, failed logs or temporary files.
+\item \textbf{Evidence level.} The result is registered as Evidence Class F: the root space and archived evidence are independently auditable, but the computation has not yet been reproduced by a separately written solver.  A second implementation remains the route to F+.
+\item \textbf{Campaign consequence.} The $Z=1$ layer of the order-$32$ transpose-symmetric investigation is complete.  Any remaining transpose-symmetric candidate must have $Z\ge2$.
+\end{itemize}
+
+\tableofcontents
+
+\section{Problem and notation}
+Let $h$ be a permutation of the board
+\[
+B=\{0,1,\ldots,31\}.
+\]
+Its permutation graph is
+\[
+G(h)=\{(x,h(x)):x\in B\}.
+\]
+The permutation is \emph{transpose-symmetric} precisely when $h=h^{-1}$, equivalently $h$ is an involution.  Thus its cycle decomposition consists only of fixed points and transpositions.
+
+\begin{definition}[Costas condition]
+The permutation $h$ is Costas if the signed displacement vectors
+\[
+(y-x,h(y)-h(x)),\qquad 0\le x<y\le31,
+\]
+are pairwise distinct.
+\end{definition}
+
+For an unordered pair $\{x,y\}$ of indices write
+\[
+\Delta(x,y)=\bigl(\abs{x-y},\abs{h(x)-h(y)}\bigr).
+\]
+A pair is \emph{large--large} when both coordinates of $\Delta(x,y)$ are at least $16$.  Define
+\[
+Z(h)=\#\bigl\{\{x,y\}:x<y,\ \abs{x-y}\ge16,\ \abs{h(x)-h(y)}\ge16\bigr\}.
+\]
+The present cell has $Z(h)=1$ and exactly $f=4$ fixed points.  The branch label $\mathrm T$ records that the unique long object is a transposition rather than a pair of fixed points.
+
+\section{Cycle spectrum for $Z=1\mathrm T$, $f=4$}
+Let $F=\{x:h(x)=x\}$, so $\abs F=4$.  The remaining $28$ coordinates form $14$ transpositions.  A transposition $(u,u+d)$ contributes the internal signed displacement $(d,-d)$, hence a transposition with $d\ge16$ contributes a large--large pair.
+
+In branch $\mathrm T$, the fixed-point ruler has diameter at most $15$.  Therefore no fixed--fixed pair is large--large and
+\[
+Z_{\mathrm{fixed\ seed}}=0.
+\]
+Exactly one of the fourteen transpositions has a long length
+\[
+L\in\{16,\ldots,31\};
+\]
+the other thirteen have distinct short lengths from $\{1,\ldots,15\}$.  Consequently exactly two short lengths are omitted.  Write them as
+\[
+1\le r<s\le15.
+\]
+The transposition-length spectrum is
+\[
+D=\{L\}\cup\bigl(\{1,\ldots,15\}\setminus\{r,s\}\bigr).
+\]
+The long transposition contributes its internal large--large pair.  Every cross-pair involving that transposition, and every later pair created by a short transposition, must avoid creating a second such contribution.
+
+\subsection{Parity condition}
+Let
+\[
+a=\#\{x\in F:x\equiv0\pmod2\}
+\]
+be the number of even fixed points.  For a transposition of length $d$, the parity of the sum of its endpoints equals the parity of $d$.  Summing the endpoint parities over all transpositions and comparing with the board gives the necessary parity condition
+\begin{equation}\label{eq:parity}
+L\equiv a+r+s\pmod2.
+\end{equation}
+Among the $\binom{15}{2}=105$ omitted pairs, $49$ have $r+s$ even and $56$ have $r+s$ odd.
+
+\subsection{Centre-sum identity}
+The sum of all board coordinates is
+\[
+\sum_{x=0}^{31}x=496.
+\]
+For a fixed-point set $F$, the total sum of the endpoints of all transpositions is
+\[
+M(F)=496-\sum_{x\in F}x.
+\]
+After choosing the long transposition $(u,u+L)$, the exact sum required from the thirteen short transpositions is
+\begin{equation}\label{eq:centresum}
+M_{\mathrm{short}}(F,L,u)=496-\sum_{x\in F}x-(2u+L).
+\end{equation}
+This identity is used both at terminal nodes and as a sound lower/upper feasibility bound during recursion.
+
+\section{Independent derivation of the root space}
+The fixed-point set must be a four-mark Golomb ruler: its six positive differences are pairwise distinct.  In branch $\mathrm T$ its diameter is at most $15$.
+
+\begin{proposition}[Fixed-point catalogue]
+There are $5{,}470$ four-subsets $F\subseteq B$ whose six positive differences are distinct and whose diameter is at most $15$.  None is fixed by board reflection
+\[
+\rho(F)=\{31-x:x\in F\}.
+\]
+Hence there are exactly $2{,}735$ board-reflection orbits and $2{,}735$ reflection-canonical outer roots.
+\end{proposition}
+
+\begin{proof}[Computational derivation]
+All $\binom{32}{4}=35{,}960$ four-subsets were enumerated directly.  A set was retained exactly when its six positive differences were distinct and its maximum difference was at most $15$.  Applying $\rho$ to every retained set found no fixed point of the reflection action, so all orbits have size two.  Translation normalisation gives $282$ oriented shapes; quotienting those shapes by interval reflection gives $141$ translation/reflection-normalised shapes.
+\end{proof}
+
+For a fixed ruler $F$, the long transposition is $(u,u+L)$ with
+\[
+16\le L\le31,\qquad 0\le u\le31-L,
+\]
+and neither endpoint may belong to $F$.  Exhaustive enumeration gives the distribution in Table~\ref{tab:longL}.
+
+\begin{table}[ht]
+\centering
+\caption{Endpoint-compatible long-transposition placements by length.}
+\label{tab:longL}
+\begin{tabular}{r r@{\qquad}r r}
+\toprule
+$L$ & count & $L$ & count\\
+\midrule
+16 & 32,820 & 24 & 18,177\\
+17 & 31,213 & 25 & 16,079\\
+18 & 29,534 & 26 & 13,932\\
+19 & 27,797 & 27 & 11,739\\
+20 & 25,993 & 28 & 9,494\\
+21 & 24,130 & 29 & 7,201\\
+22 & 22,203 & 30 & 4,851\\
+23 & 20,222 & 31 & 2,453\\
+\midrule
+\multicolumn{3}{r}{Total} & 297,838\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For each endpoint-compatible triple $(F,L,u)$, equation~\eqref{eq:parity} selects either the $49$ even-sum or the $56$ odd-sum omitted pairs.  Summed over all rulers and long placements, this gives
+\[
+15{,}642{,}886
+\]
+parity-admissible tuples $(F,L,u,r,s)$.  These figures were regenerated independently and frozen as audit expectations before the census.
+
+\section{Search architecture}
+The outer unit of work is a reflection-canonical ruler $F$, not an expanded parameter tuple.  This gives $2{,}735$ independent process-level jobs while avoiding $15.6$ million small external root files and repeated fixed-seed construction.
+
+For each ruler the full-Costas solver performs the following exhaustive steps.
+\begin{enumerate}
+\item Seed the four fixed graph points $(x,x)$ for $x\in F$, together with their six signed displacements.  Assert $Z=0$.
+\item Enumerate every endpoint-compatible long placement $(u,u+L)$.
+\item Insert its two graph points atomically.  Reject a duplicate signed displacement or any state with $Z>1$.  An accepted long seed must have $Z=1$ after counting its internal pair and all cross-pairs with the fixed points.
+\item Enumerate every omitted pair $r<s$ satisfying equation~\eqref{eq:parity}.
+\item Recursively place one transposition of every retained short length in $\{1,\ldots,15\}\setminus\{r,s\}$.
+\item At each proposed placement, reject endpoint reuse, duplicate signed displacement, or a second large--large pair.  Apply the centre-sum feasibility bound from equation~\eqref{eq:centresum}.
+\item At depth $13$, require all $32$ coordinates used, the exact centre sum, and $Z=1$.  Under full mode the maintained signed-displacement set then certifies the Costas condition.
+\end{enumerate}
+
+Signed displacements are maintained separately by horizontal lag, with a $63$-bit mask for vertical differences $-31,\ldots,31$.  Thus $(d,d)$ and $(d,-d)$ occupy distinct bits.  A per-placement pending set detects collisions created within the same proposed transposition before global state is mutated.  Successful insertions are undone through a displacement trail, while endpoint, active-point, $Z$ and permutation state are restored at every recursive return.
+
+\subsection{Audit invariants}
+The audit build included the following assertions.
+\begin{align*}
+\operatorname{popcount}(\texttt{used})&=6+2k,\\
+\texttt{active\_count}&=6+2k,\\
+Z_{\mathrm{incremental}}&=Z_{\mathrm{recomputed}},\\
+\texttt{displacements\_held}&=\binom{6+2k}{2},
+\end{align*}
+where $k$ is the number of short transpositions already placed.  The self-test confirmed the fixed seed has $Z=0$, that signed vectors $(1,1)$ and $(1,-1)$ coexist distinctly, and that the omitted-pair parity classes have sizes $49$ and $56$.
+
+\section{Census results}
+The production predicate was
+\[
+\code{EXACT\_Z1T\_F4\_AND\_FULL\_COSTAS}.
+\]
+Every reflection-canonical ruler root completed.  The archived records distinguish the full premise space from the dynamically accepted search space: \code{parity\_admissible\_records} is counted before Costas or $Z$ rejection of the long seed, while \code{seed\_compatible\_records} is counted after that filter.
+
+\begin{table}[ht]
+\centering
+\caption{Aggregate census statistics.}
+\label{tab:aggregate}
+\begin{tabular}{lr}
+\toprule
+Quantity & Total\\
+\midrule
+Outer ruler roots & 2,735\\
+Endpoint-compatible long placements & 297,838\\
+Parity-admissible parameter tuples & 15,642,886\\
+Accepted long seeds & 221,179\\
+Seed-compatible parameter tuples & 11,587,989\\
+Recursive nodes & 24,869,010,589\\
+Collision prunes & 81,978,107,515\\
+$Z$-budget prunes & 20,484,857,857\\
+Centre-sum prunes & 12,743,154\\
+Empty-domain prunes & 54,003,388\\
+Structural completions & 0\\
+Costas covers & 0\\
+Survivor files & 0\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All $2{,}735$ records terminated with
+\[
+\code{EXHAUSTED\_NO\_COSTAS\_Z1T\_F4\_COVER}.
+\]
+The recorded worker time was $36{,}124.23$ seconds, or approximately $10.03$ core-hours.  The mean and median root times were $13.21$ and $11.47$ seconds respectively.  The largest recorded root was \code{F0564}, with $35{,}841{,}787$ nodes and $53.66$ seconds.
+
+\section{Independent retally and evidence status}
+The result archive was retallied without relying on the campaign summary.  The audit read every terminal log and matching CSV, reconstructed the root-key set, checked the record schema and terminal predicates, and summed every numerical field.
+
+\begin{table}[ht]
+\centering
+\caption{Independent archive audit.}
+\label{tab:audit}
+\begin{tabular}{lr}
+\toprule
+Check & Result\\
+\midrule
+Expected roots & 2,735\\
+Terminal logs & 2,735\\
+Matching result CSVs & 2,735\\
+Missing roots & 0\\
+Unexpected roots & 0\\
+Duplicate keys & 0\\
+Malformed records & 0\\
+CSV/log mismatches & 0\\
+Failed logs & 0\\
+Temporary files & 0\\
+Survivor files & 0\\
+Premise total $297{,}838$ reproduced & yes\\
+Premise total $15{,}642{,}886$ reproduced & yes\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The archive identity is
+\begin{quote}\small\ttfamily
+70bf07955fc02a18b8155f84de07544fd2d17285793af7ebba8d1ed9f52c5252
+\end{quote}
+for \code{z1t\_results.tar.gz}.  The embedded source hash is
+\begin{quote}\small\ttfamily
+c745088ddb9acf7237c5e658fe7ab050e1e79b396edfb09f001dbf2fbef4f740
+\end{quote}
+and the production executable hash is
+\begin{quote}\small\ttfamily
+bc1ba487267a150dfada9eb1be50c63bdf94176f0cb06b9a0193efc8e58fdd42.
+\end{quote}
+
+\begin{remark}[What the retally proves]
+The retally directly audits the evidence: the intended root keys are all present, the independently derived parameter-space totals are reproduced, every record is terminal, and the reports accurately describe the archived outputs.
+\end{remark}
+
+\begin{remark}[What the retally does not prove]
+A retally does not by itself prove the soundness of the program that generated the records.  The result therefore remains Evidence Class F.  Promotion to F+ requires reproduction by a genuinely distinct implementation or an equivalent independently checkable computational certificate.
+\end{remark}
+
+\section{Conclusion for the branch}
+\begin{theorem}\label{thm:main}
+Under the registered full-Costas census, no transpose-symmetric Costas permutation of order $32$ lies in the branch $Z=1\mathrm T$, $f=4$.
+\end{theorem}
+
+\begin{proof}
+Every permutation in the branch determines a four-point fixed set $F$ of diameter at most $15$, a long transposition $(u,u+L)$ with $L\ge16$, and two omitted short lengths $r<s$ satisfying equation~\eqref{eq:parity}.  Board reflection sends any solution to an equivalent solution whose fixed set is the canonical representative of its reflection orbit.  The independent catalogue therefore covers every possible solution by one of the $2{,}735$ outer roots.  The integrated parameter counters reproduce all $297{,}838$ endpoint-compatible long placements and all $15{,}642{,}886$ parity-admissible tuples.  For every such tuple, the exhaustive recursion considers every endpoint-disjoint placement of the thirteen retained short lengths while enforcing the exact $Z=1$ condition, centre sum and full signed Costas displacement uniqueness.  Every root exhausts with zero cover.  Hence no permutation in the branch exists.
+\end{proof}
+
+\section{Campaign consequence}
+The case $Z=1\mathrm T$, $f=4$ was the final open label in the order-$32$ transpose-symmetric $Z=1$ programme.  Together with the previously registered closures of the fixed-point and transpositional branches at the other admissible fixed-point counts, Theorem~\ref{thm:main} gives the campaign-level consequence
+\[
+\boxed{\text{every remaining transpose-symmetric order-$32$ candidate has }Z\ge2.}
+\]
+This statement concerns the transpose-symmetric search only.  It does not settle the unrestricted order-$32$ Costas problem.
+
+\section{Future work}
+The completion of the $Z=1$ layer changes the strategic objective from closing one remaining cell to strengthening the evidence and extending the decomposition.
+
+\subsection{Independent reproduction and promotion to F+}
+The highest-priority verification task is a separately written solver for $Z=1\mathrm T$, $f=4$.  It should avoid the production implementation's principal design choices: use a different state representation, branching order and rollback mechanism; recompute $Z$ rather than sharing the incremental code; and validate final permutations with a direct $O(32^2)$ displacement check.  A complete second census reproducing the empty cover set would promote the claim from F to F+.
+
+A SAT, exact-cover, constraint-programming or mixed-integer formulation would provide useful implementation diversity.  The essential comparison is not merely a matching total but equality of the complete set of positive roots, which in the present census is empty.
+
+\subsection{Full assertion-enabled reproduction}
+The audit build already checks $Z$, endpoint population and displacement population locally.  A full $2{,}735$-root assertion-enabled rerun would provide stronger evidence against rollback or stale-state defects.  It would still share the production algorithm, so it would strengthen F rather than constitute F+.
+
+\subsection{The $Z\ge2$ programme}
+The next mathematical programme is to refine the large--large budget for $Z\ge2$.  Useful first steps are:
+\begin{enumerate}
+\item derive the feasible cycle spectra by fixed-point count and by the source of the large--large contributions;
+\item enumerate the corresponding fixed-point Golomb rulers and reflection orbits independently;
+\item develop lower bounds showing when multiple long objects necessarily create additional cross-quadrant mass;
+\item identify cells that close deductively before search;
+\item retain integrated root generation so that parameter-space totals remain independently auditable.
+\end{enumerate}
+The $Z=1$ campaign suggests that the most effective decomposition tracks not only the number of long objects but also whether the large--large budget is supplied internally by fixed points, internally by transpositions, or through cross-pairs.
+
+\subsection{Public release and long-term reproducibility}
+A self-contained public release should combine the source bundle, catalogue, root generator, audit scripts, complete result archive, machine-readable retally, this report and one cryptographic manifest.  The release should preserve the exact source and binary hashes above, document the compiler and execution environment, and retain fail-closed per-root records.  Containerised or reproducible-build packaging would further reduce dependence on the original system.
+
+\subsection{Unrestricted order 32}
+Transpose symmetry is only one symmetry class.  The unrestricted order-$32$ Costas existence problem remains separate.  The displacement-orbit and large--large accounting developed here may nevertheless supply pruning lemmas or partial decompositions for a broader search.
+
+\section{Reproducibility record}
+The principal artefacts are:
+\begin{description}
+\item[Campaign bundle:] \code{z1T\_f4\_campaign\_bundle\_v3.tar.gz}.
+\item[Results archive:] \code{z1t\_results.tar.gz}.
+\item[Results SHA-256:] \code{70bf07955fc02a18b8155f84de07544fd2d17285793af7ebba8d1ed9f52c5252}.
+\item[Predicate:] \code{EXACT\_Z1T\_F4\_AND\_FULL\_COSTAS}.
+\item[Negative status:] \code{EXHAUSTED\_NO\_COSTAS\_Z1T\_F4\_COVER}.
+\item[Evidence class:] F.
+\end{description}
+
+\end{document}

@@ -1,0 +1,270 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,longtable,array,microtype,xcolor,hyperref,fancyhdr}
+\definecolor{navy}{RGB}{24,55,91}
+\hypersetup{colorlinks=true,linkcolor=navy,urlcolor=navy,pdftitle={Non-existence of transpose-symmetric Costas arrays of order 32 in branch Z=1T, f=2}}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}\fancyhf{}\lhead{Order-32 Costas campaign}\rhead{$Z=1\mathrm T$, $f=2$}\cfoot{\thepage}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}\newtheorem{remark}[theorem]{Remark}
+\newcommand{\code}[1]{\texttt{#1}}
+\title{\textbf{Non-existence of transpose-symmetric Costas arrays of order 32\\in the branch $Z=1\mathrm T$, $f=2$}\\[1ex]\large A reproducible computer-assisted finite proof}
+\author{Order-32 Costas investigation}
+\date{20 September 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+We exclude transpose-symmetric Costas permutations of order $32$ in the branch $Z=1\mathrm T$, $f=2$, where $Z$ is the mass in the large--large displacement quadrant, the unique long diagonal object is a transposition, and the involution has exactly two fixed points. A parity analysis gives $326{,}480$ admissible parameter tuples. Reflection normalisation reduces the exhaustive computation to $72$ canonical long-transposition roots. Every root was searched under the complete conjunction of the prescribed involution cycle spectrum, exact endpoint coverage, global mass $Z=1$, and full Costas displacement uniqueness. The production census processed $4{,}311{,}722{,}774$ recursive nodes and found no complete assignment.
+
+The computational proof was preceded by a multi-stage audit. Earlier implementations were quarantined after invariants detected unsound rollback and same-placement collision handling. The final implementation was validated against eight structural negative fixtures, $158$ historical involutive Costas arrays of orders $12$ through $22$, an independent terminal checker, a complete small-order analogue, population invariants, sanitiser builds, and an exercised positive survivor path. All $72$ production roots used one source revision, one binary identity, and the exact predicate \code{EXACT\_Z1\_AND\_FULL\_COSTAS}. This closes the third of six cells in the order-$32$, $Z=1$, transpose-symmetric programme.
+\end{abstract}
+\tableofcontents
+\newpage
+
+\section{Executive summary and scope}
+The unrestricted existence problem for Costas arrays of order $32$ is not settled by the present theorem. Nor does this note close the complete transpose-symmetric order-$32$ problem. It proves non-existence in one precisely defined branch of a six-cell decomposition of the layer $Z=1$.
+
+The branch considered here is
+\[
+\boxed{Z=1\mathrm T,\qquad f=2.}
+\]
+The final certificate is
+\[
+\boxed{72\ \text{canonical roots}\xrightarrow{\text{exact }Z=1+\text{full Costas}}0.}
+\]
+All $72$ roots exhausted; no survivor was emitted. Three of the six $Z=1$ cells are now closed. The remaining cells have $f=4$ or $f=6$ and require richer fixed-point ruler geometry.
+
+\section{Costas permutations and transpose symmetry}
+\begin{definition}
+A permutation $h$ of $\{0,\ldots,n-1\}$ is Costas if the directed displacement vectors
+\[
+(j-i,h(j)-h(i)),\qquad 0\le i<j<n,
+\]
+are pairwise distinct. Equivalently, for every lag $s\ge1$, the values
+\[
+\Delta_{s,i}=h(i+s)-h(i),\qquad 0\le i<n-s,
+\]
+are distinct.
+\end{definition}
+A permutation matrix is symmetric about the main diagonal precisely when $h=h^{-1}$, or equivalently $h^2=\mathrm{id}$. Its cycles are fixed points and transpositions.
+
+For positive displacement magnitudes $d,e$, let $M_{d,e}$ count the absolute displacement pair $(d,e)$. For an involution, $M$ is symmetric. At order $32$, define
+\[
+Z=\sum_{d=16}^{31}\sum_{e=16}^{31}M_{d,e}.
+\]
+The branch label $\mathrm T$ means that the unique diagonal contribution to $Z=1$ is a long transposition rather than a pair of fixed points.
+
+\section{Cell-3 parameter space}
+A Cell-3 object has:
+\begin{itemize}
+\item a distinguished long transposition $(u,u+L)$, where $16\le L\le31$;
+\item exactly two fixed points $p<q$ with $q-p\le15$;
+\item one omitted short transposition length $r\in\{1,\ldots,15\}$;
+\item one transposition of every length in $\{1,\ldots,15\}\setminus\{r\}$;
+\item exact endpoint coverage and global mass $Z=1$.
+\end{itemize}
+Thus every external tuple is $(L,u,p,q,r)$.
+
+\subsection{Parity}
+Let $a$ be the number of even fixed points and $c$ the number of odd-length transpositions. Removing the fixed points and the $c$ parity-crossing transpositions leaves even-sized same-parity endpoint sets, so $c\equiv a\pmod2$. Among $1,\ldots,15$ there are eight odd lengths. Accounting for the omitted length and the long transposition gives the following.
+\begin{lemma}[Cell-3 parity rule]
+Every admissible tuple satisfies
+\[
+\boxed{r\equiv L+p+q\pmod2.}
+\]
+\end{lemma}
+Both parities of $L$ are admissible. Independent generators reproduce
+\[
+173{,}376\ \text{even-}L\text{ tuples},\qquad153{,}104\ \text{odd-}L\text{ tuples},
+\]
+for a total of
+\[
+\boxed{326{,}480.}
+\]
+
+\subsection{Reflection quotient}
+The bounded coordinate interval has only two metric automorphisms: the identity and $\rho(i)=31-i$. The long transposition root transforms as
+\[
+(L,u)\mapsto(L,31-L-u).
+\]
+Choosing
+\[
+0\le u\le\left\lfloor\frac{31-L}{2}\right\rfloor
+\]
+gives
+\[
+\sum_{L=16}^{31}\left(\left\lfloor\frac{31-L}{2}\right\rfloor+1\right)=72
+\]
+canonical roots. There is no translation symmetry on the bounded interval.
+
+\section{Search predicate and algorithm}
+The production predicate is exactly
+\begin{center}
+\code{EXACT\_Z1\_AND\_FULL\_COSTAS}.
+\end{center}
+At every partial assignment, the solver maintains one signed-difference bitset for each lag. Placing a transposition inserts its internal graph-point displacement and every cross-displacement involving the two new points and all previously active points. A placement is rejected if a new displacement is already present globally or duplicates another displacement created by the same placement. The $Z$ budget is enforced incrementally and monotonically.
+
+Rollback uses an explicit trail of $(\text{lag},\text{bit})$ insertions. Every recursion frame saves a trail mark; return clears exactly the bits inserted below that mark. No recursive snapshot is static.
+
+\subsection{P2 dense active-point implementation}
+The production implementation maintains a dense stack \code{active\_points[]} rather than scanning all $32$ coordinates during every attempted placement. Each accepted transposition appends two coordinates and rollback restores only \code{active\_count}. This changes no branch, node count, prune count, or mathematical predicate. Differential tests against the audited reference reproduced complete summaries exactly on the validation roots.
+
+\section{Audit and methodological evolution}
+The final result was not produced by the first implementation. Earlier source revisions were quarantined after measurements exposed two critical defects.
+
+\subsection{Same-placement collision collapse}
+A check-then-insert design compared every newly generated displacement only with the old global lag sets. Two equal displacements created by the same placement could both pass and collapse to one bit. The permanent debug invariant is
+\[
+\boxed{\texttt{displacements\_held}=\binom{\texttt{points\_placed}}2.}
+\]
+
+\subsection{Static recursive snapshot}
+A prototype declared the rollback buffer as a static local array. Recursive descendants therefore overwrote ancestor snapshots, violating stack discipline and permitting false pruning. The prototype and all results obtained from it were invalidated.
+
+\subsection{Validation gates}
+\begin{longtable}{@{}p{0.11\textwidth}p{0.57\textwidth}p{0.20\textwidth}@{}}
+\toprule Gate & Purpose & Final status\\\midrule
+F0 & Rollback, population invariant, AddressSanitizer and UndefinedBehaviourSanitizer & Passed\\
+F1 & Eight independently validated structural negative fixtures & Passed, $8/8$ rejected\\
+F2 & Historical involutive Costas positive controls & Passed, $158/158$ accepted\\
+F3 & Incremental oracle versus independent terminal checker & Passed\\
+F4 & Differential implementation equivalence & Passed\\
+F5 & Exercised positive survivor path and strict-mode rejection & Passed\\
+F6 & Complete small-order analogue & Passed at $n=8$\\\bottomrule
+\end{longtable}
+The F5 structural smoke test emitted six complete $Z=1$ objects at root $(30,0)$; all six were independently rejected as non-Costas. Strict full-Costas mode emitted no survivor for the same root.
+
+\section{Exhaustive census}
+\begin{theorem}
+No transpose-symmetric Costas permutation of order $32$ lies in the branch $Z=1\mathrm T$, $f=2$.
+\end{theorem}
+\begin{proof}
+The parity rule and reflection quotient cover every admissible Cell-3 tuple by exactly one of $72$ canonical roots or its reflection. The production solver exhaustively processed every root under the required cycle spectrum, endpoint exactness, global mass $Z=1$, and full Costas displacement uniqueness. Every root terminated with \code{EXHAUSTED\_NO\_COSTAS\_Z1\_COVER}, \code{mode\_complete=1}, \code{complete\_assignments=0}, and \code{costas\_z1\_covers=0}. No survivor was emitted. Hence the branch contains no Costas permutation.
+\end{proof}
+
+\subsection{Aggregate results}
+\[
+\boxed{4{,}311{,}722{,}774\ \text{recursive nodes}}
+\]
+\[
+\boxed{16{,}310{,}601{,}351\ \text{Costas collision prunes}}
+\]
+\[
+\boxed{3{,}160{,}848{,}312\ Z\text{-budget prunes}}
+\]
+\[
+\boxed{3{,}495.565\ \text{aggregate worker-seconds}=58.26\ \text{worker-minutes}.}
+\]
+Four independent root workers completed the campaign in approximately $15$ minutes of wall time.
+
+\subsection{Profile by long length}
+\begin{longtable}{@{}rrrr@{}}
+\toprule $L$ & Roots & Nodes & Worker-seconds\\\midrule
+\endfirsthead
+\toprule $L$ & Roots & Nodes & Worker-seconds\\\midrule
+\endhead
+16 & 8 & 524,323,750 & 423.610  \\
+17 & 8 & 785,927,670 & 677.874  \\
+18 & 7 & 829,884,377 & 656.077  \\
+19 & 7 & 872,337,812 & 688.355  \\
+20 & 6 & 596,542,554 & 472.272  \\
+21 & 6 & 397,468,080 & 319.380  \\
+22 & 5 & 179,974,284 & 147.953  \\
+23 & 5 & 82,620,720 & 71.042  \\
+24 & 4 & 28,219,699 & 25.181  \\
+25 & 4 & 10,434,600 & 9.785  \\
+26 & 3 & 2,895,303 & 2.872  \\
+27 & 3 & 854,507 & 0.905  \\
+28 & 2 & 178,326 & 0.194  \\
+29 & 2 & 45,828 & 0.049  \\
+30 & 1 & 11,618 & 0.012  \\
+31 & 1 & 3,646 & 0.004 \\
+\bottomrule
+\end{longtable}
+The heaviest row was $L=19$, with $872{,}337{,}812$ nodes. The heaviest individual root was $(19,0)$ with $133{,}623{,}493$ nodes.
+
+\section{Reproducibility}
+The public release contains source, build and run scripts, validation fixtures, the full raw result archive, the expected root list, environment information, smoke-test outputs, and SHA-256 manifests.
+
+\subsection{Production identities}
+\begin{description}
+\item[Source SHA-256] \code{7f5f2a8e01f86b0c68f0e57f000e815d79fbdaa06e1e40e499f49c40f3ef5be9}
+\item[Binary SHA-256] \code{7ce00a628c212ae20e7642eaf59f76dcf146cd73298bedc30cb8e1aa2e95b4b7}
+\item[Results archive SHA-256] \code{6f1d5356baf20921061eecd91d629def56befed546f34a4cad0356a8807161d4}
+\item[Results manifest SHA-256] \code{9630bfc676196968cf80c1b13fd7d3f1fcf18e9cc4302b67f1270e5cce31ef26}
+\end{description}
+
+\subsection{Production environment}
+The census ran on an Intel Core i7-1185G7 system with four physical cores and eight hardware threads, under Ubuntu, using GCC 11.4.0 and Python 3.10.12. Four root workers were used. All $72$ records contain one source hash, one binary hash, one predicate, and one negative terminal status.
+
+\subsection{Minimal reproduction}
+\begin{verbatim}
+tar -xzf costas32_cell3_public_release.tar.gz
+cd costas32_cell3_public_release/cell3_p2_campaign
+sha256sum -c SOURCE_MANIFEST.sha256
+./smoke_test.sh
+python3 run_campaign.py -j 4 2>&1 | tee logs/campaign_console.log
+python3 verify_coverage.py
+\end{verbatim}
+A successful negative reproduction reports $72/72$ completed roots, no duplicates, no missing or unexpected roots, no incomplete statuses, and no survivors.
+
+\subsection{Result verification without rerunning the search}
+\begin{verbatim}
+cd results
+sha256sum -c ../results_final_manifest.sha256
+python3 ../verify_release.py
+\end{verbatim}
+The manifest covers $151$ result files.
+
+\section{Status of the order-32 campaign}
+The present result closes the third of six $Z=1$ cells:
+\begin{longtable}{@{}lll@{}}
+\toprule Branch & Fixed points & Status\\\midrule
+$Z=1\mathrm T$ & $f=0$ & Closed: $36\to1\to0$\\
+$Z=1\mathrm F$ & $f=2$ & Closed: $36\to0$\\
+$Z=1\mathrm T$ & $f=2$ & Closed: $72\to0$ under full Costas\\
+$Z=1\mathrm F$ & $f=4$ & Unstarted\\
+$Z=1\mathrm T$ & $f=4$ & Unstarted\\
+$Z=1\mathrm F$ & $f=6$ & Unstarted\\\bottomrule
+\end{longtable}
+The complete transpose-symmetric order-$32$ problem remains open, as does unrestricted order $32$. The correct current statement is that $Z=0$ and three of the six $Z=1$ cells are closed.
+
+\section{Future work}
+The next cells have four or six fixed points and therefore require explicit fixed-point ruler geometry. The validated full-Costas oracle, trail rollback, dense active-point implementation, fail-closed runner, and per-root manifests are reusable. Immediate priorities are:
+\begin{enumerate}
+\item enumerate and canonicalise the relevant fixed-point Golomb rulers;
+\item apply the omitted-length parity condition before recursion;
+\item integrate ruler selection and omitted lengths into the search rather than create a prohibitively large external tuple census;
+\item retain the complete audit suite, including historical positives, structural fixtures, terminal-checker equivalence, population invariants and survivor contingency;
+\item close the remaining $Z=1$ cells before analysing $Z\ge2$ or attempting a complete transpose-symmetric census.
+\end{enumerate}
+A separate unrestricted-order work package must still seek either an explicit order-$32$ Costas permutation or a global, machine-checkable decomposition of all canonical permutations.
+
+\section{Conclusion}
+Cell 3 is empty. The exclusion is not based on sampling, heuristic filtering, or an incomplete structural census. It follows from exhaustive canonical-root coverage under the complete Costas predicate, one source revision, one production binary identity, fail-closed per-root records, independent positive and negative controls, and a cryptographically hashed archive. Equally important, the audit history shows why the final result is credible: unsound implementations were detected by measurement, quarantined, and excluded from the theorem record before production coverage restarted from zero.
+
+\appendix
+\section{Expected terminal record}
+Each negative root record contains the canonical root key, predicate, source and binary hashes, status, completion flag, search nodes, complete assignments, Costas covers, collision prunes, $Z$ prunes and elapsed seconds. A completed negative record has:
+\begin{verbatim}
+search_predicate=EXACT_Z1_AND_FULL_COSTAS
+status=EXHAUSTED_NO_COSTAS_Z1_COVER
+mode_complete=1
+complete_assignments=0
+costas_z1_covers=0
+\end{verbatim}
+
+\section{Public-release checklist}
+\begin{enumerate}
+\item Verify the release SHA-256 before extraction.
+\item Verify \code{SOURCE\_MANIFEST.sha256} before compilation.
+\item Run the smoke suite and confirm six structural emissions and zero strict survivors at $(30,0)$.
+\item Record compiler, operating system and CPU information.
+\item Run one or more independent workers; roots share no mutable state.
+\item Verify exact 72-root set coverage after completion.
+\item If any survivor appears, preserve it and run the independent terminal checker before interpretation.
+\end{enumerate}
+\end{document}

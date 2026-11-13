@@ -1,0 +1,184 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,longtable,array,microtype,xcolor,hyperref,fancyhdr}
+\definecolor{navy}{RGB}{24,55,91}
+\hypersetup{colorlinks=true,linkcolor=navy,urlcolor=navy,pdftitle={Non-existence in branch Z=1F, f=6 for transpose-symmetric Costas arrays of order 32}}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}\fancyhf{}\lhead{Order-32 Costas campaign}\rhead{$Z=1\mathrm F$, $f=6$}\cfoot{\thepage}
+\newtheorem{theorem}{Theorem}[section]\newtheorem{lemma}[theorem]{Lemma}\theoremstyle{definition}\newtheorem{definition}[theorem]{Definition}
+\newcommand{\code}[1]{\texttt{#1}}
+\title{\textbf{Non-existence of transpose-symmetric Costas arrays of order 32\\in the branch $Z=1\mathrm F$, $f=6$}\\[1ex]\large A reproducible structural and full-Costas census}
+\author{Order-32 Costas investigation}
+\date{20 September 2026}
+\begin{document}\maketitle
+\begin{abstract}
+We exclude transpose-symmetric Costas permutations of order $32$ in the branch $Z=1\mathrm F$, $f=6$, where the unique contribution to the large--large displacement quadrant is supplied by a pair of fixed points. Exhaustive Golomb-ruler enumeration gives one translation/reflection-normalised six-mark shape, $\{0,4,11,13,14,19\}$, and $13$ reflection-canonical absolute rulers on $\{0,\ldots,31\}$. The remaining $26$ coordinates must form $13$ transpositions of distinct lengths selected from $\{1,\ldots,15\}$; parity requires the two omitted lengths to have opposite parity. This produces $13\cdot56=728$ canonical search roots.
+
+Two exhaustive censuses were completed. A structural exact-cover search processed $132{,}439{,}106$ nodes and found no endpoint-disjoint transposition cover satisfying the length spectrum, exact centre-sum budget, and $Z=1$ constraint. Independently, a full signed-displacement Costas search processed $310{,}755$ nodes and found no Costas cover. Every one of the $728$ roots exhausted with a negative terminal status in both modes. Thus the branch is empty. Together with the independent ruler obstruction for $Z=1\mathrm T$, $f=6$, five of the six $Z=1$ cells are now closed; only the two four-fixed-point labels remain active.
+\end{abstract}
+\tableofcontents\newpage
+
+\section{Scope and result}
+This note concerns only transpose-symmetric Costas arrays of order $32$ in the branch
+\[
+\boxed{Z=1\mathrm F,\qquad f=6.}
+\]
+It does not settle unrestricted order $32$ or the complete transpose-symmetric order-$32$ problem.
+
+\begin{theorem}
+No transpose-symmetric Costas permutation of order $32$ lies in the branch $Z=1\mathrm F$, $f=6$.
+\end{theorem}
+The proof is stronger than a full-Costas-only census: the branch has no structural cover with the required fixed-point ruler, transposition-length spectrum, endpoint exactness, centre sum, and $Z=1$ budget.
+
+\section{Fixed-point geometry}
+The fixed points of a Costas involution form a Golomb ruler because two equal fixed-point distances would produce the same directed displacement $(d,d)$. In this branch, six fixed points must contribute exactly one large--large displacement. Exhaustive order-$32$ ruler enumeration gives one normalised shape,
+\[
+R=(0,4,11,13,14,19),
+\]
+whose positive difference set is
+\[
+\{1,2,3,4,5,6,7,8,9,10,11,13,14,15,19\}.
+\]
+The unique long fixed-fixed displacement is $(19,19)$. The opposite orientation is $(0,5,6,8,15,19)$. Translation within the board and reflection $x\mapsto31-x$ yield $26$ absolute rulers and $13$ reflection orbits. The campaign uses one representative from each orbit.
+
+\section{Root parameterisation}
+With six fixed points, the remaining $26$ coordinates form $13$ transpositions. Their internal directed displacements are $(d,-d)$, so their lengths are distinct. Since the fixed points already supply the unique large--large contribution, every transposition length is at most $15$. Thus the length set is
+\[
+D_{r,s}=\{1,\ldots,15\}\setminus\{r,s\},\qquad 1\le r<s\le15.
+\]
+Every canonical ruler has three even and three odd marks. Endpoint parity therefore requires an odd number of odd-length transpositions. Among $1,\ldots,15$ there are eight odd lengths, so exactly one of $r,s$ must be odd:
+\[
+\boxed{r\not\equiv s\pmod2.}
+\]
+There are $8\cdot7=56$ admissible unordered omitted pairs per ruler and hence
+\[
+\boxed{13\cdot56=728}
+\]
+canonical roots.
+
+For a fixed-point set $F$, the exact transposition centre-sum target is
+\[
+\boxed{M(F)=496-\sum_{x\in F}x.}
+\]
+Across the catalogue, the $13$ targets are
+\[
+399,405,411,413,417,419,423,425,429,431,435,437,443,
+\]
+each appearing in $56$ roots.
+
+\section{Search modes}
+\subsection{Structural exact-cover mode}
+The structural solver enforces:
+\begin{enumerate}
+\item the six seeded fixed points;
+\item one transposition of every retained length in $D_{r,s}$;
+\item disjointness from fixed points and from all other transpositions;
+\item exact coverage of the $26$ non-fixed coordinates;
+\item the exact centre-sum target $M(F)$;
+\item no second large--large displacement, so the final mass remains $Z=1$.
+\end{enumerate}
+It does not use general Costas collision pruning. Its predicate is \code{EXACT\_Z1F\_F6\_STRUCTURAL}.
+
+\subsection{Full-Costas mode}
+The full solver additionally maintains signed displacement bitsets by horizontal lag. Fixed-fixed differences are seeded as $(d,d)$, while the internal displacement of a transposition of length $d$ is $(d,-d)$. These signs are preserved. Cross-displacements are inserted incrementally, and any repeated signed displacement rejects the branch. The predicate is \code{EXACT\_Z1F\_F6\_AND\_FULL\_COSTAS}.
+
+Both modes use the exact $Z$ budget and centre-sum pruning. Roots are independent and were executed with process-level parallelism.
+
+\section{Coverage and results}
+The result archive contains, for each of the $728$ roots, one structural log and CSV record and one full-mode log and CSV record. The audit found:
+\begin{itemize}
+\item $728$ distinct roots and no missing or unexpected root keys;
+\item exactly $56$ roots for each ruler ID $F000,\ldots,F012$;
+\item $1{,}456$ logs and $1{,}456$ matching result CSV files;
+\item no malformed records and no log/CSV mismatches;
+\item no survivor files.
+\end{itemize}
+
+\subsection{Structural census}
+All $728$ roots terminated with
+\begin{center}\code{EXHAUSTED\_NO\_STRUCTURAL\_Z1F\_F6\_COVER}.\end{center}
+The aggregate profile was:
+\[
+\boxed{132{,}439{,}106\ \text{nodes}},\qquad
+\boxed{242{,}640{,}003\ Z\text{-prunes}},\qquad
+\boxed{5{,}334{,}055\ \text{centre-sum prunes}}.
+\]
+Aggregate worker time was $90.029347$ seconds. The heaviest structural root was $F011$ with omitted lengths $6$ and $7$, at $484{,}669$ nodes. No structural cover was found.
+
+\subsection{Full-Costas census}
+All $728$ roots terminated with
+\begin{center}\code{EXHAUSTED\_NO\_COSTAS\_Z1F\_F6\_COVER}.\end{center}
+The aggregate profile was:
+\[
+\boxed{310{,}755\ \text{nodes}},\qquad
+\boxed{1{,}104{,}281\ \text{Costas collision prunes}},\qquad
+\boxed{357{,}566\ Z\text{-prunes}}.
+\]
+There were $19$ centre-sum prunes and $1.981800$ aggregate worker-seconds. The heaviest full root was $F007$ with omitted lengths $9$ and $12$, at $1{,}766$ nodes. No Costas cover was found.
+
+\section{Proof of the theorem}
+\begin{proof}
+The fixed-point Golomb-ruler enumeration is exhaustive under board reflection and yields exactly $13$ canonical fixed-point sets. For each set, endpoint parity yields exactly $56$ admissible omitted-length pairs, so the $728$ roots exhaust the branch. The structural census exhaustively considered every endpoint-disjoint assignment of one transposition at each retained short length while enforcing exact coordinate coverage, the centre-sum identity, and $Z=1$. All $728$ roots exhausted without a structural cover. Therefore no complete involution with the required branch structure exists, and in particular no Costas permutation exists in the branch. The independently completed full-Costas census agrees and also returns zero covers.\end{proof}
+
+\section{Reproducibility and provenance}
+The reviewed result archive has SHA-256
+\begin{verbatim}
+8aeb7f6e30158c44290f949272da4f72a45e369d36cc821fac980ebe023d31b4
+\end{verbatim}
+It records the following build identities:
+\begin{verbatim}
+ff7c0d704b9bdea548ebb63874a8896bbd3df318e70d6ab9058bd0d5472f59b6  src/z1f6_search.cpp
+d38b9459b9ada4e86682e546b678c9d001a5980d422062dcccca279c19c7cb9e  z1f6_search
+\end{verbatim}
+The result-only archive does not contain those two build artefacts, so their hashes must be checked against the campaign bundle or repository release. The campaign bundle should be published alongside the result archive.
+
+Minimal result verification is:
+\begin{verbatim}
+tar -xzf z1f6_results.tar.gz
+cd results
+find raw -name '*.structural.result.csv' | wc -l   # 728
+find raw -name '*.full.result.csv'       | wc -l   # 728
+find survivors -type f                   | wc -l   # 0
+\end{verbatim}
+A complete public release should also include the source, executable or reproducible build recipe, ruler catalogue, generated root list, environment record, source manifest, and a set-based coverage verifier.
+
+\section{Status of the order-32 campaign}
+The $Z=1$ programme now has five closed cells:
+\begin{longtable}{@{}lll@{}}\toprule
+Branch & Fixed points & Status\\\midrule
+$Z=1\mathrm T$ & $f=0$ & Closed: structural cover exists but is not Costas\\
+$Z=1\mathrm F$ & $f=2$ & Closed: exhaustive structural census\\
+$Z=1\mathrm T$ & $f=2$ & Closed: $72$ full-Costas roots, zero covers\\
+$Z=1\mathrm T$ & $f=6$ & Closed by six-mark ruler obstruction\\
+$Z=1\mathrm F$ & $f=6$ & Closed: $728$ structural and full roots, zero covers\\
+$Z=1\mathrm T$ & $f=4$ & Active: $2{,}735$ reflection-canonical rulers\\
+$Z=1\mathrm F$ & $f=4$ & Active: $2{,}573$ reflection-canonical rulers\\\bottomrule
+\end{longtable}
+The table lists seven labels because the fixed-point mechanism splits the $f=4$, $f=6$ cases by whether the unique $Z=1$ contribution is transpositional or fixed-fixed. In terms of the original six-cell programme used in the preceding report, the substantive conclusion is that only the two four-fixed-point work packages remain.
+
+\section{Future work}
+The next phase should focus exclusively on the two four-fixed-point cells.
+
+\subsection{$Z=1\mathrm T$, $f=4$}
+Use the $2{,}735$ absolute reflection-canonical rulers, grouped into $141$ translation/reflection-normalised shapes. Each ruler has no long fixed-fixed pair. The remaining $28$ coordinates form $14$ transpositions, with one omitted short length and one required long transposition supplying the unique $Z=1$ contribution. The omitted length, long-transposition placement, parity, endpoint exactness, and centre-sum budget should be selected inside an integrated recursion rather than expanded into a large external tuple list.
+
+\subsection{$Z=1\mathrm F$, $f=4$}
+Use the $2{,}573$ reflection-canonical rulers, grouped into $200$ normalised shapes and stratified by their unique long fixed-fixed difference $16,\ldots,27$. The fixed points already saturate $Z=1$, so every transposition and cross-displacement must avoid a second large--large contribution. The validated signed-displacement oracle should be seeded with all six fixed-fixed displacements and used from the first recursive placement.
+
+\subsection{Audit plan}
+Both campaigns should retain the practices established in Cell 3 and the present cell:
+\begin{enumerate}
+\item independent ruler and root generators with set equality checks;
+\item exact parity and centre-sum assertions;
+\item population invariants for seeded and incremental displacement sets;
+\item reversible trail rollback and dense active-point iteration;
+\item structural and full modes with explicit survivor emission;
+\item independent terminal Costas checking;
+\item fail-closed, per-root result records and cryptographic manifests;
+\item process-level parallelism across canonical ruler roots.
+\end{enumerate}
+Once both four-fixed-point cells are closed, the full $Z=1$ layer for transpose-symmetric order $32$ will be complete. Work can then move to $Z\ge2$ or to a global decomposition of the complete transpose-symmetric search. The unrestricted order-$32$ problem remains a separate objective.
+
+\section{Conclusion}
+The branch $Z=1\mathrm F$, $f=6$ is empty. The decisive result is structural: none of the $728$ canonical ruler-and-omitted-pair roots admits a complete transposition cover satisfying endpoint exactness, centre sum, and the saturated $Z=1$ budget. A separate full signed-Costas census independently confirms zero covers at much smaller search cost. With this result and the six-mark ruler obstruction in the transpositional branch, only the two four-fixed-point work packages remain in the $Z=1$ campaign.
+\end{document}

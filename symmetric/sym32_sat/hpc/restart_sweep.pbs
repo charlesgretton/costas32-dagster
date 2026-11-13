@@ -1,0 +1,32 @@
+#!/bin/bash
+# How fast does Dagster finish UNSAT searches with aggressive restarting and
+# clause strengthening?  Runs Arm D (native split) and Arm B (mono) over a grid of
+# TiniSAT restart settings, on the Stage-1 tail.  No proofs: this measures speed.
+#   STAGE1=$COSTAS_DATA/results/stage1_<id> qsub -v STAGE1 hpc/restart_sweep.pbs
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=104,mem=480GB,walltime=12:00:00,jobfs=4GB
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas-sweep
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-.}"; source hpc/env.sh
+[ -n "${STAGE1:-}" ] || { echo "set STAGE1"; exit 1; }
+OUT="$COSTAS_DATA/results/sweep_${PBS_JOBID:-local}"; mkdir -p "$OUT"
+python3 hpc/select_tail.py "$STAGE1/ledger.jsonl" "${SLOW:-120}" | head -n "${MAXREG:-34}" > "$OUT/tail.txt"
+[ -s "$OUT/tail.txt" ] || { echo "EMPTY TAIL -- nothing hard enough to sweep"; exit 0; }
+# label|flags.  -m 0 is TiniSAT alone, -m 3 adds the strengthener.
+GRID=${GRID:-"tini_luby|-m 0 -e 0 -b 0 -g 1 -p 1
+tini_every|-m 0 -e 0 -b 0 -g 1 -p 2
+tini_geo100|-m 0 -e 0 -b 0 -g 1 -x 100 -y 0.95
+tini_geo20|-m 0 -e 0 -b 0 -g 1 -x 20 -y 0.80
+strg_luby|-m 3 -e 0 -b 0 -g 1 -p 1
+strg_every|-m 3 -e 0 -b 0 -g 1 -p 2
+strg_geo20|-m 3 -e 0 -b 0 -g 1 -x 20 -y 0.80"}
+while IFS='|' read -r label flags; do
+  [ -n "$label" ] || continue
+  echo "== $label : $flags"
+  DAGSTER_FLAGS="$flags" bash hpc/run_shards.sh "$OUT/tail.txt" "$OUT/$label" "${CAP:-600}" B,D 3 102
+  for a in dagster_mono dagster_native_split; do
+    python3 hpc/stage_report.py "$OUT/$label/ledger.jsonl" $a; done | sed "s/^/[$label] /"
+done <<< "$GRID" | tee "$OUT/report.txt"

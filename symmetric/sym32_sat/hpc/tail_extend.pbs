@@ -1,0 +1,25 @@
+#!/bin/bash
+# Kissat alone, LONG cap, on exactly the regions Stage 1 could not close in 600 s.
+# Measures the true tail: how long the censored f=4 regions take, and whether the
+# f=2 and f=0 regions close at all.  One region per core, on a partial node.
+#   qsub -v STAGE1=$COSTAS_DATA/results/stage1_<id> hpc/tail_extend.pbs
+# Rerun only some regions (IDS = a file of region ids), on fewer cores:
+#   qsub -l ncpus=16,mem=72GB -v STAGE1=...,IDS=/path/missing.txt hpc/tail_extend.pbs
+# If you change CAP (seconds), set walltime to CAP + 20 min.
+# Cost ceiling at the default 4 h cap: 48 cores x ~4.1 h x 2 SU = ~400 SU.
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=48,mem=220GB,walltime=04:20:00,jobfs=2GB
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas-tail
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-.}"; source hpc/env.sh
+[ -n "${STAGE1:-}" ] || { echo "set STAGE1 to the stage-1 results directory"; exit 1; }
+OUT="$COSTAS_DATA/results/tail_${PBS_JOBID:-local}"; mkdir -p "$OUT"
+if [ -n "${IDS:-}" ]; then cp "$IDS" "$OUT/censored.txt"                     # explicit list, e.g. a rerun
+else python3 hpc/select_tail.py "$STAGE1/ledger.jsonl" 1e12 > "$OUT/censored.txt"; fi   # censored only
+N=$(wc -l < "$OUT/censored.txt"); echo "censored regions: $N"
+[ "$N" -le 48 ] || { echo "more than 48 censored regions: raise ncpus or split the list"; exit 1; }
+bash hpc/run_shards.sh "$OUT/censored.txt" "$OUT" "${CAP:-14400}" A 1 48
+python3 hpc/stage1_by_f.py "$OUT/ledger.jsonl" --no-projection | tee "$OUT/report.txt"

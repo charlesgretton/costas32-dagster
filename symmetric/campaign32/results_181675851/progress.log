@@ -1,0 +1,16 @@
+[13:59:38] campaign directory: <redacted>/campaign32_inv_n32   (job 181675851, python Python 3.11.0)
+[13:59:38] preflight write test passed
+[13:59:38] build
+[13:59:39] self-test at orders 16 18 20 22 24 (must pass before any order-32 work)
+order 16: unsplit 160797 nodes, 40 arrays; split into 1735 tasks; merge reproduces both exactly
+order 18: unsplit 864774 nodes, 20 arrays; split into 2736 tasks; merge reproduces both exactly
+order 20: unsplit 4710666 nodes, 8 arrays; split into 4069 tasks; merge reproduces both exactly
+order 22: unsplit 25853570 nodes, 10 arrays; split into 5782 tasks; merge reproduces both exactly
+order 24: unsplit 142822399 nodes, 0 arrays; split into 7923 tasks; merge reproduces both exactly
+SELFTEST PASS
+[14:00:31] split order 32 at depth 3
+[14:00:33] #SPLIT n=32 depth=3 tasks=21727 prefix_nodes=934 prefix_arrays=0
+[14:00:33] 870 of 870 chunks to run on 104 workers
+[14:22:06] chunk runner finished: xargs status 0; failed chunks this run: 0
+[14:22:06] merge
+[14:22:07] DONE: COMPLETE: NO transpose-symmetric Costas array

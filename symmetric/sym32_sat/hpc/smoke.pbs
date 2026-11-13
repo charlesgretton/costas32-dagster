@@ -1,0 +1,28 @@
+#!/bin/bash
+# Smoke test: ORDER 10, one region known SAT and one known UNSAT, all three arms.
+# Must end with SMOKE OK. Run before anything at order 32.     qsub hpc/smoke.pbs
+#PBS -P YOUR_PROJECT
+#PBS -q YOUR_QUEUE
+#PBS -l ncpus=8,mem=16GB,walltime=00:15:00
+#PBS -l wd
+#PBS -l storage=YOUR_STORAGE
+#PBS -N costas-smoke
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-.}"; source hpc/env.sh
+export COSTAS_N=10 MPIRUN_EXTRA="--bind-to none --oversubscribe"
+OUT="$COSTAS_DATA/results/smoke_${PBS_JOBID:-local}"; mkdir -p "$OUT"
+printf 'region_id,f,fixed_points,diameter,even_fixed\nTSAT,0,,0,0\nTUNSAT,2,0 3,3,1\n' > "$OUT/regions.csv"
+python3 pilot_driver.py --regions "$OUT/regions.csv" --ids TSAT,TUNSAT --out "$OUT" --cap 120 --ranks 3
+python3 - "$OUT/ledger.jsonl" <<'PY'
+import json,sys
+R=[json.loads(l) for l in open(sys.argv[1]) if '"split_child"' not in l]
+want={("TSAT","kissat"):"SAT",("TSAT","dagster_mono"):"SAT",("TSAT","kissat_split_agg"):"SAT",
+      ("TSAT","dagster_native_split"):"SAT",("TUNSAT","dagster_native_split"):"UNSAT_UNPROVEN",
+      ("TUNSAT","kissat"):"UNSAT",("TUNSAT","dagster_mono"):"UNSAT_UNPROVEN",("TUNSAT","kissat_split_agg"):"UNSAT"}
+got={(r["region_id"],r["arm"]):r["status"] for r in R}
+bad=[(k,v,got.get(k)) for k,v in want.items() if got.get(k)!=v]
+sat_ok=all(r.get("model_validated") for r in R if r["status"]=="SAT" and r["arm"]!="kissat_split_agg")
+if bad or not sat_ok:
+    print("SMOKE FAILED:", bad, "sat models validated:", sat_ok); sys.exit(1)
+print("SMOKE OK: all four arms agree on known SAT and known UNSAT; SAT models validated")
+PY

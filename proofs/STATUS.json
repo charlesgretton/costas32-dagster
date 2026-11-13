@@ -1,0 +1,903 @@
+{
+ "schema": "costas32-proof-status/2",
+ "lean_toolchain": "leanprover/lean4:v4.15.0",
+ "mathlib": "not required",
+ "note": "15 modules, ~100 declarations, typechecked at Lean 4.15.0; no sorry, no native_decide, no Mathlib. Abstract T_m soundness complete (tm_assembly_sound); implementation correspondence to f3_complete.cpp remains.; order-29 Tier B: 23 per-seed certificates kernel-checked, orbit cardinality and validity each compile alone; symmetric programme: M_LL=0 closed entirely, 4 of 6 Z=1 cells closed, see symmetric/CLAIMS.md for per-claim evidential basis",
+ "report_claims": [
+  {
+   "id": "A1",
+   "name": "diagonal parity floor",
+   "tier": "A",
+   "paper_proof": true,
+   "lean": "core",
+   "file": "lean/Costas32/Core.lean",
+   "effort": "moderate"
+  },
+  {
+   "id": "A2",
+   "name": "T_m inference rule soundness",
+   "tier": "A",
+   "paper_proof": true,
+   "lean": "proved (abstract); implementation correspondence open",
+   "file": "lean/Costas32/Core.lean",
+   "effort": "moderate-hard"
+  },
+  {
+   "id": "A3",
+   "name": "automatic loss-free parameterisation",
+   "tier": "A",
+   "paper_proof": "partial",
+   "lean": "proved",
+   "file": "lean/Costas32/Core.lean",
+   "effort": "easy"
+  },
+  {
+   "id": "A4",
+   "name": "offset invariance of interpolation degree",
+   "tier": "A",
+   "paper_proof": false,
+   "lean": "none",
+   "file": null,
+   "effort": "easy"
+  },
+  {
+   "id": "A5",
+   "name": "telescoping identity and T_m = T_{n-m}",
+   "tier": "A",
+   "paper_proof": true,
+   "lean": "proved",
+   "file": "lean/Costas32/Core.lean",
+   "effort": "easy"
+  },
+  {
+   "id": "A6",
+   "name": "one off-curve point forces full degree",
+   "tier": "A",
+   "paper_proof": true,
+   "lean": "none",
+   "file": null,
+   "effort": "easy"
+  },
+  {
+   "id": "A7",
+   "name": "overdetermination does not imply inconsistency",
+   "tier": "A",
+   "paper_proof": true,
+   "lean": "proved",
+   "file": "lean/Costas32/Core.lean",
+   "effort": "easy"
+  },
+  {
+   "id": "A8",
+   "name": "truncation destroys associativity",
+   "tier": "A",
+   "paper_proof": true,
+   "lean": "none",
+   "file": null,
+   "effort": "easy"
+  },
+  {
+   "id": "A9",
+   "name": "a Costas array is not a representation",
+   "tier": "A",
+   "paper_proof": true,
+   "lean": "none",
+   "file": null,
+   "effort": "easy"
+  },
+  {
+   "id": "A10",
+   "name": "corrected board-network characterisation",
+   "tier": "A",
+   "paper_proof": "definitional",
+   "lean": "none",
+   "file": null,
+   "effort": "moderate"
+  },
+  {
+   "id": "A11",
+   "name": "2-adic tower domination",
+   "tier": "A",
+   "paper_proof": true,
+   "lean": "none",
+   "file": null,
+   "effort": "moderate"
+  },
+  {
+   "id": "A12",
+   "name": "l-infinity collision bound",
+   "tier": "A",
+   "paper_proof": true,
+   "lean": "none",
+   "file": null,
+   "effort": "moderate"
+  },
+  {
+   "id": "A13",
+   "name": "corner deletion acts by translation",
+   "tier": "A",
+   "paper_proof": false,
+   "lean": "none",
+   "file": null,
+   "effort": "easy"
+  },
+  {
+   "id": "B1",
+   "name": "m_2 >= 1",
+   "tier": "B",
+   "scale": "2^17 cases",
+   "route": "verified checker or structural proof",
+   "lean": "none"
+  },
+  {
+   "id": "B2",
+   "name": "census-complete rung k=3",
+   "tier": "B",
+   "scale": "5.66e8 placements",
+   "route": "certificate + checker",
+   "lean": "none"
+  },
+  {
+   "id": "B3",
+   "name": "rung results k=2 and k=4",
+   "tier": "B",
+   "scale": "1.15e11 placements",
+   "route": "checker architecture only",
+   "lean": "none"
+  },
+  {
+   "id": "B4",
+   "name": "order-28 catalogue completeness",
+   "tier": "B",
+   "scale": "1e3",
+   "route": "decide",
+   "lean": "none"
+  },
+  {
+   "id": "B5",
+   "name": "order-28 census classification",
+   "tier": "B",
+   "scale": "1e6",
+   "route": "native_decide",
+   "lean": "none"
+  },
+  {
+   "id": "B6",
+   "name": "F3 computational result",
+   "tier": "B",
+   "scale": "3e5",
+   "route": "checker; soundness half is A2",
+   "lean": "none"
+  },
+  {
+   "id": "B7",
+   "name": "heredity is corner-driven",
+   "tier": "B",
+   "scale": "1e4",
+   "route": "native_decide",
+   "lean": "none"
+  },
+  {
+   "id": "B8",
+   "name": "the missing orbit",
+   "tier": "B",
+   "scale": "1e3",
+   "route": "decide",
+   "lean": "none"
+  },
+  {
+   "id": "B9",
+   "name": "order-29 census reconstruction",
+   "tier": "B",
+   "scale": "1e2",
+   "route": "decide",
+   "lean": "seeds proved (23/23 by decide); orbit theorems compile individually; full build needs >4GB",
+   "recommended_first": true
+  },
+  {
+   "id": "C1",
+   "name": "Order-sensitivity requirement",
+   "tier": "C",
+   "location": "Obs 4.3",
+   "note": "explicitly a heuristic, not a theorem",
+   "lean": "n/a"
+  },
+  {
+   "id": "C2",
+   "name": "Implication for rung prioritisation",
+   "tier": "C",
+   "location": "Heur 6.x",
+   "note": "extrapolative analogy",
+   "lean": "n/a"
+  },
+  {
+   "id": "C3",
+   "name": "Quadratic collision cost fits the sporadic curve",
+   "tier": "C",
+   "location": "Obs 12.6",
+   "note": "model fit",
+   "lean": "n/a"
+  },
+  {
+   "id": "C4",
+   "name": "Where the forecast's weight sits",
+   "tier": "C",
+   "location": "Obs 12.8",
+   "note": "statement about model-class dependence",
+   "lean": "n/a"
+  },
+  {
+   "id": "C5",
+   "name": "Analytic null for the screening statistic",
+   "tier": "C",
+   "location": "Obs 8.1",
+   "note": "probabilistic heuristic",
+   "lean": "n/a"
+  },
+  {
+   "id": "C6",
+   "name": "Genealogy of the score-2 object",
+   "tier": "C",
+   "location": "Obs 6.x",
+   "note": "a computation's narrative",
+   "lean": "n/a"
+  },
+  {
+   "id": "C7",
+   "name": "Independent agreement with the published classification",
+   "tier": "C",
+   "location": "Obs 8.x",
+   "note": "comparison of two computations",
+   "lean": "n/a"
+  },
+  {
+   "id": "C8",
+   "name": "The predeclared F3 gate is underpowered",
+   "tier": "C",
+   "location": "Obs 7.1",
+   "note": "statistical power calculation",
+   "lean": "n/a"
+  },
+  {
+   "id": "C9",
+   "name": "Mechanistic reading of $T_m$",
+   "tier": "C",
+   "location": "Obs 7.4",
+   "note": "interpretation",
+   "lean": "n/a"
+  },
+  {
+   "id": "C10",
+   "name": "F3\u2032 verdict",
+   "tier": "C",
+   "location": "Obs 7.5",
+   "note": "measurement against a declared gate",
+   "lean": "n/a"
+  },
+  {
+   "id": "C11",
+   "name": "Constant factor, not slope (GF(32) family)",
+   "tier": "C",
+   "location": "Obs 9.x",
+   "note": "measurement",
+   "lean": "n/a"
+  },
+  {
+   "id": "C12",
+   "name": "Calibration (anti-Ramsey)",
+   "tier": "C",
+   "location": "Obs 13.x",
+   "note": "measurement",
+   "lean": "n/a"
+  },
+  {
+   "id": "C13",
+   "name": "Extinction-model observations (remaining)",
+   "tier": "C",
+   "location": "\u00a712",
+   "note": "model-dependent",
+   "lean": "n/a"
+  }
+ ],
+ "symmetric_claims": [
+  {
+   "id": "S-D1",
+   "name": "transpose symmetry is the only stabiliser",
+   "tier": "symmetric",
+   "evidence": "D",
+   "basis": [
+    {
+     "type": "report",
+     "path": "report/costas32_report.tex",
+     "label": "prop:no180",
+     "pinned_by": "label"
+    }
+   ],
+   "note": "deductive",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-D2",
+   "name": "fixed points form a Golomb ruler; f in {0,2,4,6}",
+   "tier": "symmetric",
+   "evidence": "D",
+   "basis": [
+    {
+     "type": "report",
+     "path": "report/costas32_report.tex",
+     "label": "prop:fpgolomb",
+     "pinned_by": "label"
+    }
+   ],
+   "note": "deductive; 158/158 arrays",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-D3",
+   "name": "quadrant-mass identity X_r - Z_r",
+   "tier": "symmetric",
+   "evidence": "D",
+   "basis": [
+    {
+     "type": "report",
+     "path": "report/costas32_report.tex",
+     "label": "sec:symmetric",
+     "pinned_by": "label"
+    }
+   ],
+   "note": "deductive; single-valued n=12..22",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-D4",
+   "name": "Aut(G_15) = {id, rho}",
+   "tier": "symmetric",
+   "evidence": "D",
+   "basis": [
+    {
+     "type": "report",
+     "path": "report/costas32_report.tex",
+     "label": "sec:symmetric",
+     "pinned_by": "label"
+    }
+   ],
+   "note": "deductive by computation, 32 vertices",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-D5",
+   "name": "parity c = a (mod 2) and its two specialisations",
+   "tier": "symmetric",
+   "evidence": "D",
+   "basis": [
+    {
+     "type": "report",
+     "path": "report/costas32_report.tex",
+     "label": "sec:z1cells",
+     "pinned_by": "label"
+    }
+   ],
+   "note": "deductive; exhaustive over (f,a,c)",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-D6",
+   "name": "unit-slope rigidity for involutions",
+   "tier": "symmetric",
+   "evidence": "D",
+   "basis": [
+    {
+     "type": "report",
+     "path": "report/costas32_report.tex",
+     "label": "sec:z1cells",
+     "pinned_by": "label"
+    }
+   ],
+   "note": "deductive; 0 violations on 158 arrays",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-F1",
+   "name": "no f=2, M_LL=0",
+   "tier": "symmetric",
+   "evidence": "F",
+   "basis": [
+    {
+     "type": "source",
+     "path": "symmetric/src/f2_mll0_branch_search.cpp",
+     "sha256_16": "9265c83f9de31e8b",
+     "pinned_by": "sha256"
+    },
+    {
+     "type": "certificate",
+     "path": "symmetric/z1/results/f2_mll0_residual_certificates.txt",
+     "sha256_16": "728fdb255497f2ab",
+     "pinned_by": "sha256"
+    }
+   ],
+   "note": "32,769,242 -> 9,180 -> 4 -> 0; 2 collision certificates",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-F2",
+   "name": "no f=4, M_LL=0",
+   "tier": "symmetric",
+   "evidence": "F",
+   "basis": [
+    {
+     "type": "source",
+     "path": "symmetric/src/f4_mll0_cover_census.cpp",
+     "sha256_16": "0dc9f8fac59a1fa4",
+     "pinned_by": "sha256"
+    }
+   ],
+   "note": "20,360 -> 0 at exact cover",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-F3",
+   "name": "M_LL = 0 is empty",
+   "tier": "symmetric",
+   "evidence": "F",
+   "basis": [
+    {
+     "type": "report",
+     "path": "report/costas32_report.tex",
+     "label": "cor:mll0",
+     "pinned_by": "label"
+    }
+   ],
+   "note": "corollary of S-F1, S-F2 plus f=0,6 structural corollary: f=0 and f=6 die structurally, f=2 is S-F1, f=4 is S-F2",
+   "lean": "n/a",
+   "derives_from": [
+    "S-F1",
+    "S-F2"
+   ]
+  },
+  {
+   "id": "S-F4",
+   "name": "Z=1T f=0 empty",
+   "tier": "symmetric",
+   "evidence": "F",
+   "basis": [
+    {
+     "type": "certificate",
+     "path": "symmetric/z1/results/z1_T_f0_census36_complete.csv",
+     "sha256_16": "89c3d2d80fd16b0f",
+     "pinned_by": "sha256"
+    },
+    {
+     "type": "source",
+     "path": "symmetric/census/z1_jobB_28_0.cpp",
+     "sha256_16": "bbb3e965f505086e",
+     "pinned_by": "sha256"
+    }
+   ],
+   "note": "36 -> 1 -> 0",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-F5",
+   "name": "Z=1F f=2 empty",
+   "tier": "symmetric",
+   "evidence": "F",
+   "basis": [
+    {
+     "type": "certificate",
+     "path": "symmetric/z1/results/z1F_f2_ledger.csv",
+     "sha256_16": "82a0cc24e920bea4",
+     "pinned_by": "sha256"
+    },
+    {
+     "type": "source",
+     "path": "symmetric/census/z1F_f2_census.cpp",
+     "sha256_16": "a4e05f31adb3d639",
+     "pinned_by": "sha256"
+    }
+   ],
+   "note": "36 -> 0",
+   "lean": "n/a"
+  },
+  {
+   "id": "S-F6",
+   "name": "Z=1T f=2 empty",
+   "tier": "symmetric",
+   "evidence": "F",
+   "basis": [
+    {
+     "type": "report",
+     "path": "symmetric/z1/closed_cells/costas32_cell3_report.tex",
+     "pinned_by": "label"
+    },
+    {
+     "type": "release",
+     "path": "symmetric/z1/closed_cells/costas32_cell3_public_release.tar.gz",
+     "sha256_16": "a5e5bbac5f9f82d1",
+     "pinned_by": "sha256"
+    },
+    {
+     "type": "manifest",
+     "path": "symmetric/z1/closed_cells/cell3_results_manifest.sha256",
+     "sha256_16": "dde8b695c921fb57",
+     "pinned_by": "sha256"
+    }
+   ],
+   "note": "72 -> 0, EXACT_Z1_AND_FULL_COSTAS, externally audited complete 72-root result set present in the public release and independently re-tallied here; all terminal, zero covers, zero survivors.",
+   "lean": "n/a",
+   "verified_here": {
+    "root_records": 72,
+    "distinct_keys": 72,
+    "duplicates": 0,
+    "expected_key_set_exact": true,
+    "missing": [],
+    "unexpected": [],
+    "statuses": {
+     "EXHAUSTED_NO_COSTAS_Z1_COVER": 72
+    },
+    "predicate": "EXACT_Z1_AND_FULL_COSTAS",
+    "source_sha256_16": "7f5f2a8e01f86b0c",
+    "nodes": 4311722774,
+    "costas_covers": 0,
+    "collision_prunes": 16310601351,
+    "z_budget_prunes": 3160848312,
+    "worker_seconds": 3495.565,
+    "survivor_files": 0,
+    "all_mode_complete": true
+   }
+  },
+  {
+   "id": "S-F7",
+   "name": "Z=1F f=6 empty",
+   "tier": "symmetric",
+   "evidence": "F",
+   "basis": [
+    {
+     "type": "report",
+     "path": "symmetric/z1/closed_cells/costas32_z1F_f6_report.tex",
+     "pinned_by": "label"
+    },
+    {
+     "type": "release",
+     "path": "symmetric/z1/closed_cells/z1F_f6_campaign_bundle.tar.gz",
+     "sha256_16": "98fe51c2615d4acf",
+     "pinned_by": "sha256"
+    },
+    {
+     "type": "results",
+     "path": "symmetric/z1/closed_cells/z1f6_results.tar.gz",
+     "pinned_by": "sha256",
+     "sha256_16": "8aeb7f6e30158c44"
+    },
+    {
+     "type": "manifest",
+     "path": "symmetric/z1/closed_cells/z1F_f6_results_manifest.sha256",
+     "pinned_by": "sha256",
+     "sha256_16": "6287481311eb8db6"
+    },
+    {
+     "type": "source",
+     "path": "symmetric/z1/closed_cells/z1f6_campaign_src/src/z1f6_search.cpp",
+     "pinned_by": "sha256",
+     "sha256_16": "ff7c0d704b9bdea5"
+    }
+   ],
+   "note": "728 -> 0, structural and full Costas complete result archive present and independently re-tallied here: 728+728 records, all terminal, zero covers.",
+   "lean": "n/a",
+   "verified_here": {
+    "structural": {
+     "records": 728,
+     "distinct_keys": 728,
+     "nodes": 132439106,
+     "covers": 0,
+     "non_terminal": 0,
+     "worker_seconds": 90.029
+    },
+    "full": {
+     "records": 728,
+     "distinct_keys": 728,
+     "nodes": 310755,
+     "covers": 0,
+     "non_terminal": 0,
+     "worker_seconds": 1.982
+    },
+    "key_sets_identical_across_modes": true,
+    "survivor_files": 0
+   },
+   "reproducible": {
+    "bundle": "symmetric/z1/closed_cells/z1f6_campaign_src",
+    "commands": [
+     "sh build.sh",
+     "python3 run_campaign.py --mode structural",
+     "python3 run_campaign.py --mode full"
+    ],
+    "note": "campaign is runnable from source; not rerun in the authoring environment (single core, no between-turn execution). Rerunning with THIS solver would not establish F+ \u2014 that needs a distinct implementation."
+   },
+   "root_space_derived_independently": {
+    "method": "regenerated here: 6-mark Golomb rulers, exactly one separation >=16 at the extreme pair, reflection-normalised; opposite-parity omitted pairs",
+    "canonical_rulers": 13,
+    "omitted_pairs_per_ruler": 56,
+    "roots": 728,
+    "matches_campaign_catalogue": true,
+    "note": "two translation-normalised shapes (0,4,11,13,14,19) and (0,5,6,8,15,19); they are reflections of one another, so the report's 'unique shape' is correct up to reflection",
+    "shape_statement": "one translation-and-reflection-normalised shape, equivalently two translation-normalised oriented shapes (0,4,11,13,14,19) and (0,5,6,8,15,19); 2 orientations x 13 translations = 26 absolute placements = 13 board-reflection orbits"
+   }
+  },
+  {
+   "id": "S-F8",
+   "name": "Z=1F f=4 empty",
+   "tier": "symmetric",
+   "evidence": "F",
+   "lean": "n/a",
+   "basis": [
+    {
+     "type": "results",
+     "path": "symmetric/z1/closed_cells/z1f4_results.tar.gz",
+     "pinned_by": "sha256",
+     "sha256_16": "9b1fadb129200ed0"
+    },
+    {
+     "type": "manifest",
+     "path": "symmetric/z1/closed_cells/z1F_f4_results_manifest.sha256",
+     "pinned_by": "sha256",
+     "sha256_16": "3e1d3fd75a7ec80e"
+    },
+    {
+     "type": "source",
+     "path": "symmetric/z1/closed_cells/z1f4_campaign_src/src/z1f4_search.cpp",
+     "pinned_by": "sha256",
+     "sha256_16": "d4c20d7a3d8c76d3"
+    },
+    {
+     "type": "catalogue",
+     "path": "symmetric/z1/closed_cells/z1f4_campaign_src/roots.csv",
+     "pinned_by": "sha256",
+     "sha256_16": "40f2e8da0bf3f456"
+    }
+   ],
+   "note": "structural census is decisive (any Costas array must first be a structural cover); full-Costas census corroborates at a second predicate but shares the implementation",
+   "root_space_derived_independently": {
+    "method": "regenerated here from first principles: 4-mark Golomb rulers with exactly one separation >=16, that separation being the extreme pair, board-reflection normalised; then parity o(R)=a mod 2 with |R|=1",
+    "canonical_rulers": 2573,
+    "roots": 19405,
+    "matches_campaign_catalogue": true,
+    "raw_rulers": 5146,
+    "catalogue_set_equality": true,
+    "root_key_set_equality": true
+   },
+   "verified_here": {
+    "structural": {
+     "records": 19405,
+     "distinct": 19405,
+     "dup": 0,
+     "nodes": 58912947195,
+     "covers": 0,
+     "all_terminal": true,
+     "status": "EXHAUSTED_NO_STRUCTURAL_Z1F_F4_COVER",
+     "worker_seconds": 40781.7
+    },
+    "full": {
+     "records": 19405,
+     "distinct": 19405,
+     "dup": 0,
+     "nodes": 453999790,
+     "covers": 0,
+     "all_terminal": true,
+     "status": "EXHAUSTED_NO_COSTAS_Z1F_F4_COVER",
+     "worker_seconds": 871.4
+    },
+    "key_sets_identical_across_modes": true,
+    "survivor_files": 0,
+    "keys_match_independently_derived_root_space": true
+   }
+  },
+  {
+   "id": "S-F9",
+   "name": "Z=1T f=4 empty \u2014 the last Z=1 label",
+   "tier": "symmetric",
+   "evidence": "F",
+   "lean": "n/a",
+   "basis": [
+    {
+     "type": "results",
+     "path": "symmetric/z1/closed_cells/z1t_f4_results.tar.gz",
+     "pinned_by": "sha256",
+     "sha256_16": "70bf07955fc02a18"
+    },
+    {
+     "type": "manifest",
+     "path": "symmetric/z1/closed_cells/z1T_f4_results_manifest.sha256",
+     "pinned_by": "sha256",
+     "sha256_16": "32071b9fcadd4340"
+    },
+    {
+     "type": "report",
+     "path": "symmetric/z1/closed_cells/costas32_z1T_f4_report.tex",
+     "pinned_by": "sha256",
+     "sha256_16": "5413b6d6f32f6935"
+    },
+    {
+     "type": "source",
+     "path": "symmetric/z1/closed_cells/z1t_f4_campaign_src/src/z1t_f4_search.cpp",
+     "pinned_by": "sha256",
+     "sha256_16": "c745088ddb9acf72"
+    },
+    {
+     "type": "catalogue",
+     "path": "symmetric/z1/closed_cells/z1t_f4_campaign_src/roots.csv",
+     "pinned_by": "sha256",
+     "sha256_16": "ac363c9851b99087"
+    }
+   ],
+   "root_space_derived_independently": {
+    "method": "regenerated here before the campaign: 4-mark Golomb rulers diameter<=15, board-reflection normalised; long placements (F,L,u) with endpoints off the ruler; parity L = a+r+s (mod 2)",
+    "raw_rulers": 5470,
+    "reflection_canonical_rulers": 2735,
+    "reflection_self_symmetric": 0,
+    "translation_shapes": 282,
+    "translation_reflection_shapes": 141,
+    "long_placements_F_L_u": 297838,
+    "omitted_pairs_same_parity": 49,
+    "omitted_pairs_opposite": 56,
+    "external_records_F_L_u_r_s": 15642886,
+    "matches_campaign_totals": true
+   },
+   "verified_here": {
+    "records": 2735,
+    "distinct": 2735,
+    "dup": 0,
+    "missing": 0,
+    "unexpected": 0,
+    "predicate": "EXACT_Z1T_F4_AND_FULL_COSTAS",
+    "status": "EXHAUSTED_NO_COSTAS_Z1T_F4_COVER",
+    "long_placements": 297838,
+    "parity_admissible_records": 15642886,
+    "accepted_long_seeds": 221179,
+    "seed_compatible_records": 11587989,
+    "nodes": 24869010589,
+    "structural_covers": 0,
+    "costas_covers": 0,
+    "collision_prunes": 81978107515,
+    "z_prunes": 20484857857,
+    "sum_prunes": 12743154,
+    "domain_prunes": 54003388,
+    "worker_seconds": 36124.23,
+    "largest_root": "F0564",
+    "survivor_files": 0,
+    "premise_totals_match_my_independent_derivation": true
+   },
+   "note": "the campaign's internal traversal totals (297,838 long placements and 15,642,886 parity-admissible records) equal the figures I derived independently BEFORE the solver existed, so the census covered the intended premise space, not merely one record per outer root. T4-8 positive arm closed by a recursive known-positive fixture; the zero census is not an artefact of an unreachable terminal layer.",
+   "positive_arm_T4_8": {
+    "status": "PASS",
+    "method": "Option B recursive known-positive fixture",
+    "artefact": "symmetric/z1/closed_cells/z1t_f4_campaign_src/audit/T4-8_positive_arm.md",
+    "fixture": "Z budget lifted only; endpoint cover, centre sum and spectrum untouched",
+    "ruler": "F0000 = {0,1,3,7}",
+    "survivor_lines": "3,498,614 emitted during a 60-second BOUNDED run; not a total, not exhaustive, not a cardinality",
+    "independently_revalidated": "2000/2000 sampled, zero failures",
+    "establishes": "terminal depth reachable; all terminal conditions simultaneously satisfiable; positive counter increments; emission yields complete valid objects",
+    "does_not_establish": "correctness of Z-budget enforcement itself (covered by A5/T4-5 recompute_Z()==Zp)",
+    "sampled_and_checked": "2,000 sampled; 2,000 accepted; 0 rejected",
+    "duplicate_check": "first 200,000 emitted lines are 200,000 distinct; emitter duplicate-free on that prefix",
+    "scope": "passes under a WEAKENED Z-budget specification: only the incremental Zp+zadd>1 prune and the terminal Zp!=1 rejection were removed",
+    "registry_wording": "T4-8 passes by positive-arm testing under a weakened Z-budget specification. After removing only the incremental Zp+zadd>1 prune and the terminal Zp!=1 rejection, the otherwise unchanged recursion reaches accepted terminal states, increments structural_covers, and emits independently valid completions. During a 60-second bounded run on root F0000 it emitted 3,498,614 survivor lines. This is neither an exhaustive count nor a claimed cardinality. Of these, 2,000 sampled objects were independently checked and all 2,000 passed. The first 200,000 emitted records were also compared for duplication and were all distinct. This test establishes that the recursive terminal, counter and emission paths operate when completions exist. It does not establish the correctness of the enforced Z=1 budget, which is addressed separately by T4-5/A5 through direct comparison of the incremental and recomputed Z values."
+   },
+   "gates": {
+    "T4-8": "PASS",
+    "T4-5/A5": "PASS",
+    "root_space": "independently derived",
+    "result_archive": "independently retallied",
+    "F+": "not established"
+   }
+  },
+  {
+   "id": "S-D7",
+   "name": "orbit decomposition Z = I_F + q + 2C for involutions",
+   "tier": "symmetric",
+   "evidence": "D",
+   "lean": "n/a",
+   "basis": [
+    {
+     "type": "report",
+     "path": "symmetric/z2/README.md",
+     "pinned_by": "sha256",
+     "sha256_16": "14029d88c6f93e59"
+    }
+   ],
+   "note": "tau{x,y}={h(x),h(y)} has orbits of size 1 or 2; singletons are exactly the fixed-fixed far pairs and the long transpositions",
+   "verified_here": {
+    "random_involutions": 12000,
+    "orders": [
+     16,
+     20,
+     24,
+     32
+    ],
+    "historical_costas_arrays": 158,
+    "violations": 0
+   }
+  }
+ ],
+ "withdrawn": [
+  {
+   "id": "W1",
+   "statement": "Cell-3 fast full-Costas benchmark 13,928/14,602/15,707 nodes and its zero counts",
+   "reason": "same-placement collision loss (under-prunes) AND static recursive snapshot (over-prunes; can manufacture false zeros)",
+   "artefact": "symmetric/z1/retired/cell3_full_costas_UNSOUND_d778ab05.cpp"
+  },
+  {
+   "id": "W2",
+   "statement": "10 pre-audit Z=1T f=2 root results",
+   "reason": "lag-1 binary with stale-bit rollback; unsound prune",
+   "artefact": "provenance only"
+  },
+  {
+   "id": "W3",
+   "statement": "'the defect only threatens false positives, not zero results'",
+   "reason": "incorrect diagnosis: the static snapshot over-prunes and can produce false zeros",
+   "artefact": "withdrawn assertion, no artefact"
+  }
+ ],
+ "known_gaps": [
+  {
+   "gap": "F+ reproduction by a genuinely independent second implementation",
+   "applies_to": [
+    "S-F6",
+    "S-F7",
+    "S-F8",
+    "S-F9"
+   ],
+   "note": "no further testing of the existing solvers can close this; implementation independence is the property at issue"
+  }
+ ],
+ "summary": {
+  "report_claims": {
+   "total": 35,
+   "by_tier": {
+    "A": 13,
+    "B": 9,
+    "C": 13
+   }
+  },
+  "symmetric_claims": {
+   "total": 16,
+   "by_evidence": {
+    "D": 7,
+    "F": 9
+   }
+  },
+  "registry_objects_total": 51,
+  "derived_from_lists": true
+ },
+ "open_cells": [],
+ "milestone": {
+  "statement": "all seven Z=1 branch labels closed; with M_LL=0 also closed, every remaining order-32 transpose-symmetric candidate satisfies Z>=2",
+  "closed_labels": [
+   "Z=1T f=0",
+   "Z=1F f=2",
+   "Z=1T f=2",
+   "Z=1T f=6 (deductive)",
+   "Z=1F f=6",
+   "Z=1F f=4",
+   "Z=1T f=4"
+  ],
+  "next_frontier": "Z>=2",
+  "release_check_provenance": "locally reported; not independently materialised or checked by the external auditor as of this revision"
+ },
+ "next_layer": {
+  "layer": "Z = 2",
+  "types": {
+   "S": "I_F+q=2, C=0",
+   "X": "I_F=q=0, C=1"
+  },
+  "excluded": "I_F+q=1 implies Z != 2; I_F>=3 impossible for Z=2",
+  "feasible_cells": 10,
+  "catalogue_cross_checks": [
+   "f=4 I_F=0 -> 2735 = Z=1T f=4 catalogue",
+   "f=4 I_F=1 -> 2573 = Z=1F f=4 catalogue",
+   "f=6 I_F=1 -> 13 = Z=1F f=6 catalogue",
+   "f=6 I_F=0 empty (OGR(6)=17>15)",
+   "f=8 no rulers"
+  ],
+  "artefact": "symmetric/z2/README.md"
+ }
+}
